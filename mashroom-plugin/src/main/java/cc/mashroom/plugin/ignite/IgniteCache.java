@@ -15,6 +15,7 @@
  */
 package cc.mashroom.plugin.ignite;
 
+import java.util.Iterator;
 import  java.util.LinkedList;
 import  java.util.List;
 import  java.util.concurrent.locks.Lock;
@@ -92,7 +93,7 @@ public  class  IgniteCache<K,V>  implements  XCache<K,V>
 		
 		try( FieldsQueryCursor<List<Object>>  cursor = xcache.query(new  SqlFieldsQuery(sql).setArgs(params)) )
 		{
-			cursor.forEach( (List<Object>  values) -> {list.add(fillColumns(new  HashMap<String,Object>(),cursor,values));} );  return  list;
+			for( Iterator<List<Object>>  iterator = cursor.iterator();iterator.hasNext(); )  { list.add(fillColumns(new HashMap<String,Object>(),cursor,iterator.next())); }  return  list;
 		}
 	}
 }

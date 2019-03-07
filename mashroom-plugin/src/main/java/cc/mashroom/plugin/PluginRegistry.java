@@ -20,7 +20,6 @@ import  java.util.List;
 
 import  com.google.common.collect.Lists;
 
-import  cc.mashroom.util.stream.Stream;
 import  lombok.AccessLevel;
 import  lombok.NoArgsConstructor;
 
@@ -28,24 +27,24 @@ import  lombok.NoArgsConstructor;
 
 public  class   PluginRegistry
 {
-	public  final  static  PluginRegistry  INSTANCE  = new  PluginRegistry();
+	public  final  static  PluginRegistry  INSTANCE   = new  PluginRegistry();
 	
-	private  List<Plugin>  registered = new  LinkedList<Plugin>();
+	private  List<Plugin>  registeredPlugins = new  LinkedList<Plugin>();
 	
 	public  PluginRegistry  register( Plugin...  plugins )
 	{
-		registered.addAll(  Lists.newArrayList(plugins) );
+		registeredPlugins.addAll( Lists.newArrayList(plugins ) );
 		
 		return  this;
 	}
 		
 	public  void  stop()
 	{
-		registered.forEach(   (plugin) -> plugin.stop() );
+		for( Plugin  plugin : registeredPlugins )  plugin.stop();
 	}
 	
 	public  void  initialize()
 	{
-		Stream.forEach( registered,(Plugin  plugin) -> plugin.initialize() );
+		for( Plugin  plugin : registeredPlugins )  try{ plugin.initialize(); }  catch(Exception  e){e.printStackTrace(); }
 	}
 }

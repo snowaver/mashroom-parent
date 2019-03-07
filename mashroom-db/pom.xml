@@ -1,46 +1,26 @@
 <project  xmlns="http://maven.apache.org/POM/4.0.0"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0  http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	
-	<licenses><license><name>Apache License, Version 2.0</name><url>http://www.apache.org/licenses/LICENSE-2.0</url></license></licenses>
-	
+	<artifactId>mashroom-db</artifactId><name>mashroom-db</name>
 	<modelVersion>4.0.0</modelVersion>
-			<artifactId>mashroom-db</artifactId>
-	<packaging>jar</packaging>
-	<name>mashroom-db</name>
-	<url>http://mashroom.cc</url>
+	<packaging>jar</packaging><url>http://mashroom.cc/</url>
 	
 	<parent >
-		<groupId>cc.mashroom</groupId>
-		<artifactId>mashroom-parent</artifactId>
-		<version>v1.0.0</version>
-		<relativePath >../pom.xml</relativePath>
+		<groupId>cc.mashroom</groupId><artifactId>mashroom-parent</artifactId><version>v1.0.0</version>  <relativePath >../pom.xml</relativePath>
 	</parent>
 	
-	<properties >
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<dependencies >
-
 		<dependency >
-			<groupId>com.mchange</groupId> <artifactId>c3p0</artifactId><version>0.9.5.3</version><scope>provided</scope>
+			<groupId>com.mchange</groupId><artifactId>c3p0</artifactId><version>${c3p0.version}</version><scope>provided</scope>
 		</dependency>
-
 		<dependency >
-			<groupId>com.h2database</groupId><artifactId>h2</artifactId><version>1.4.198</version><scope>provided</scope>
+			<groupId>com.h2database</groupId><artifactId>h2</artifactId> <version>${h2.version}</version><scope>provided</scope>
 		</dependency>
-
 		<dependency >
-			<groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>1.18.6</version><scope>provided</scope>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${parent.version}</version>
 		</dependency>
-		
 		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-config</artifactId><version>v1.0.0</version>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-config</artifactId><version>${parent.version}</version>
 		</dependency>
-		
-		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>v1.0.0</version>
-		</dependency>
-		
 	</dependencies>
 	
 	<build >
@@ -50,9 +30,6 @@
 			</plugin>
 			<plugin >
 				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.1.1</version><configuration><archive><manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile></archive></configuration>
-			</plugin>
-			<plugin >
-				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-install-plugin</artifactId><version>2.3.1</version>
 			</plugin>
 		</plugins>
 	</build>

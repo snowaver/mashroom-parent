@@ -59,7 +59,7 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	
 	public  <K,V>  XCache<K,V>  createCache( String  name )
 	{
-		return  caches.computeIfAbsent( name,(key)-> new  H2Cache<K,V>(key) );
+		return  caches.computeIfLackof(name,new  Map.Computer<String,H2Cache>(){public  H2Cache  compute(String  key)  throws  Exception{return  new  H2Cache<K,V>(key);}});
 	}
 	
 	public  void  initialize()  throws  Exception

@@ -28,6 +28,7 @@ import  org.apache.ignite.IgniteException;
 import  org.apache.ignite.Ignition;
 import  org.apache.ignite.cluster.ClusterGroup;
 import  org.apache.ignite.cluster.ClusterNode;
+import org.apache.ignite.lang.IgnitePredicate;
 import  org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 
 import  cc.mashroom.db.ConnectionFactory;
@@ -138,6 +139,6 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 		
 	private  ClusterGroup  createClusterGroup( final  Set< String >  clusterNodeIds )
 	{
-		return  ignite.cluster().forPredicate( ( ClusterNode  clusterNode ) -> clusterNodeIds.contains(clusterNode.id().toString()) );
+		return  ignite.cluster().forPredicate( new  IgnitePredicate<ClusterNode>(){public  boolean  apply(ClusterNode  clusterNode){return  clusterNodeIds.contains(clusterNode.id().toString());}} );
 	}
 }
