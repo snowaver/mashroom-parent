@@ -20,7 +20,7 @@
 				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><configuration><source>1.7</source><target>1.7</target></configuration>
 			</plugin>
 			<plugin >
-				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.1.1</version><configuration><archive><manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile></archive></configuration>
+				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.1.1</version><configuration></configuration>
 			</plugin>
 		</plugins>
 	</build>
