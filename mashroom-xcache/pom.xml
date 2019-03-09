@@ -10,10 +10,7 @@
 	
 	<dependencies >
 		<dependency >
-		    <groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>${slf4j.version}</version>
-		</dependency>
-		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${parent.version}</version>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 	

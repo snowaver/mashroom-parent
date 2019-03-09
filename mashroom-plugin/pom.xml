@@ -19,10 +19,10 @@
 			<groupId>org.fusesource</groupId><artifactId>sigar</artifactId><version>${sigar.version}</version>
 		</dependency>
 		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-xcache</artifactId><version>${parent.version}</version>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-xcache</artifactId><version>${project.parent.version}</version>
 		</dependency>
 		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-db</artifactId><version>${parent.version}</version>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-db</artifactId><version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 	

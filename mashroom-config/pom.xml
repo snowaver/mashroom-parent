@@ -10,7 +10,7 @@
 	
 	<dependencies >
 		<dependency >
-			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${parent.version}</version>
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 	
