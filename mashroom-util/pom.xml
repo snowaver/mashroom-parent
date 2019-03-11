@@ -18,8 +18,9 @@
 		<dependency >
 			<groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId><version>${jackson.version}</version>
 		</dependency>
+		<!-- commons collections 4.3 or later requires java 8, so downgrade the version to 4.2 for most android devices using java 7. -->
 		<dependency >
-    		<groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId><version>${commons.collections4.version}</version>
+			<groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId><version>${commons.collections4.version}</version>
 		</dependency>
 		<dependency >
 			<groupId>joda-time</groupId><artifactId>joda-time</artifactId><version>${jodatime.version}</version>
