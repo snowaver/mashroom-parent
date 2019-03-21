@@ -28,7 +28,7 @@ import  org.apache.ignite.IgniteException;
 import  org.apache.ignite.Ignition;
 import  org.apache.ignite.cluster.ClusterGroup;
 import  org.apache.ignite.cluster.ClusterNode;
-import org.apache.ignite.lang.IgnitePredicate;
+import  org.apache.ignite.lang.IgnitePredicate;
 import  org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 
 import  cc.mashroom.db.ConnectionFactory;
@@ -135,6 +135,11 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	public  String getLocalNodeId()
 	{
 		return  ignite.cluster().localNode().id().toString();
+	}
+	
+	public  long  getNextSequence( String  name )
+	{
+		return  ignite.atomicLong(name,0,true ).incrementAndGet();
 	}
 		
 	private  ClusterGroup  createClusterGroup( final  Set< String >  clusterNodeIds )

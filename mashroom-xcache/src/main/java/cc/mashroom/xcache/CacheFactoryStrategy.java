@@ -23,6 +23,8 @@ public  interface  CacheFactoryStrategy
 {
 	public  String  getLocalNodeId();
 	
+	public  long  getNextSequence( String  name );
+	
 	public  List<XClusterNode>  getClusterNodes();
 	
 	public  <K,V>  XCache<K,V>  createCache( String  name );

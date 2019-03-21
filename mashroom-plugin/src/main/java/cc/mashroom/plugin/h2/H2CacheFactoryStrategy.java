@@ -19,6 +19,7 @@ import  java.io.InputStream;
 import  java.lang.management.ManagementFactory;
 import  java.util.List;
 import  java.util.UUID;
+import  java.util.concurrent.atomic.AtomicLong;
 
 import  org.apache.commons.io.IOUtils;
 import  org.hyperic.sigar.Sigar;
@@ -42,7 +43,7 @@ import  cc.mashroom.xcache.util.RemoteCallable;
 public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 {
 	private  XClusterNode  localNode = new  XClusterNode( 0,UUID.randomUUID(),"0.0.0.0",new  HashMap<String,Object>() );
-		
+	
 	public  String  getLocalNodeId()
 	{
 		return      localNode.getId().toString();
@@ -51,6 +52,8 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	private  Sigar  sigar = new  Sigar();
 	
 	private  Map<String , H2Cache>  caches = new  ConcurrentHashMap<String , H2Cache>();
+	
+	private  Map<String,AtomicLong>  sequenceLongs = new  ConcurrentHashMap<String,AtomicLong>();
 	
 	public  <V>  V  call( RemoteCallable< V >  callable,List< String >  clusterNodeIds )
 	{
@@ -97,5 +100,10 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 		}
 		
 		return  Lists.newArrayList(  localNode );
+	}
+	
+	public  long  getNextSequence( String  name )
+	{
+		return  sequenceLongs.computeIfLackof(name,new  Map.Computer<String,AtomicLong>(){public  AtomicLong  compute(String  key)  throws  Exception{return  new  AtomicLong();}}).incrementAndGet();
 	}
 }

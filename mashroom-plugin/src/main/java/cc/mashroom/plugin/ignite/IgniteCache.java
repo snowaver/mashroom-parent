@@ -15,29 +15,30 @@
  */
 package cc.mashroom.plugin.ignite;
 
-import java.util.Iterator;
+import  java.util.Iterator;
 import  java.util.LinkedList;
 import  java.util.List;
 import  java.util.concurrent.locks.Lock;
 
 import  org.apache.ignite.cache.query.FieldsQueryCursor;
 import  org.apache.ignite.cache.query.SqlFieldsQuery;
-import  org.slf4j.LoggerFactory;
 
 import  cc.mashroom.util.CollectionUtils;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  cc.mashroom.xcache.XCache;
+import  lombok.Setter;
 
 public  class  IgniteCache<K,V>  implements  XCache<K,V>
 {
-	private  final  org.slf4j.Logger  logger = LoggerFactory.getLogger( IgniteCache.class );
-	
+	@Setter
 	private  org.apache.ignite.IgniteCache  xcache;
-	
+	/*
+	private  final  org.slf4j.Logger  logger= LoggerFactory.getLogger( IgniteCache.class );
+	*/
 	public  IgniteCache(  org.apache.ignite.IgniteCache<K,V>  xcache )
 	{
-		this.xcache= xcache;
+		setXcache( xcache );
 	}
 	
 	public  V  get( K  key )
@@ -57,7 +58,7 @@ public  class  IgniteCache<K,V>  implements  XCache<K,V>
 			
 	public  boolean  put(  K  key,V  value )
 	{
-		xcache.put(    key,value );
+		xcache.put(  key , value );
 		
 		return  true;
 	}
@@ -66,17 +67,17 @@ public  class  IgniteCache<K,V>  implements  XCache<K,V>
 	{
 		return  xcache.remove(   key );
 	}
-
+	
 	private  Map<String,Object>  fillColumns( Map<String,Object>  record,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )
 	{
-		for( int  i = 0;i <= values.size()-1;i = i+1 )
+		for( int  i = 0;i <= values.size()- 1;i = i+ 1 )
 		{
 			record.addEntry( cursor.getFieldName(i),values.get( i ) );
 		}
 		
 		return  record;
 	}
-	
+		
 	public  boolean  update(    String  sql,Object...  params )
 	{
 		return  !xcache.query(new  SqlFieldsQuery(sql).setArgs(params)).getAll().isEmpty();
@@ -87,9 +88,9 @@ public  class  IgniteCache<K,V>  implements  XCache<K,V>
 		return  CollectionUtils.getFirst( search(sql,params) );
 	}
 	
-	public  List<Map<String,Object>>  search( String  sql,Object...  params )
+	public  List<Map<String,Object>>  search( String  sql , Object...  params )
 	{
-		List<Map<String,Object>>  list =  new  LinkedList<Map<String,Object>>();
+		List<Map<String,Object>>  list = new  LinkedList<Map<String,Object>>();
 		
 		try( FieldsQueryCursor<List<Object>>  cursor = xcache.query(new  SqlFieldsQuery(sql).setArgs(params)) )
 		{

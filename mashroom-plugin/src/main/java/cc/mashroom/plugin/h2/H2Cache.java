@@ -33,23 +33,29 @@ public  class  H2Cache<K,V>  implements  XCache<K,V>
 {
 	public  H2Cache(   String  name )
 	{
-		this.setName(name );
+		setName(   name );
 	}
 	
-	private  Map<K, V>  cache = new  ConcurrentHashMap<K, V>();
+	private  Map<K,ReentrantLock>  lockers = new  ConcurrentHashMap<K,ReentrantLock>();
 	
-	private  ReentrantLock  lock  = new  ReentrantLock( true );
-	
-	public  V  get( K  key )
+	private  Map<K,V>  cache   = new  ConcurrentHashMap<K,V>();
+	/*
+	private  ReentrantReadWriteLock  lock    = new  ReentrantReadWriteLock();
+	*/
+	public  V  get(K  key)
 	{
 		return  cache.get( key );
 	}
 	@Setter
-	private  String    name;
+	private  String  name;
 	
 	public  Lock  getLock(   K  key )
 	{
-		lock.lock();    return  lock;
+		if( lockers.containsKey(key ) && ! lockers.get( key ).isHeldByCurrentThread() )
+		{
+			return   null;
+		}
+		return  lockers.computeIfLackof( key,new  Map.Computer<K, ReentrantLock>(){public  ReentrantLock  compute(K  key)  throws  Exception{return  new  ReentrantLock();}} );
 	}
 	
 	public  V  get( K  key,Class<V>  clazz )
@@ -62,14 +68,13 @@ public  class  H2Cache<K,V>  implements  XCache<K,V>
 	
 	public  boolean  put(  K  key,V  value )
 	{
-		if( !   lock.isLocked() )
+		if( lockers.containsKey(key ) && ! lockers.get( key ).isHeldByCurrentThread() )
 		{
-			cache.put( key , value );
-			
-			return  true;
+			return  false;
 		}
+		this.cache.put( key ,value );
 		
-		return  false;
+		return  true;
 		/*
 		throw  new  UnsupportedOperationException( "MASHROOM-PLUGIN:  ** H2  CACHE **  this  operation  is  not  supported." );
 		*/
@@ -87,24 +92,18 @@ public  class  H2Cache<K,V>  implements  XCache<K,V>
 	
 	public  boolean  update(    String  sql,Object...  params )
 	{
-		if( !   lock.isLocked() )
-		{
-			return  H2Model.dao.update(sql,params) >= 0;
-		}
-		
-		return  false;
+		return  H2Model.dao.update(sql,params) >= 0;
 	}
 	
 	public  boolean  remove( K  key )
 	{
-		if( !   lock.isLocked() )
+		if( lockers.containsKey(key ) && ! lockers.get( key ).isHeldByCurrentThread() )
 		{
-			cache.remove(  key );
-			
-			return  true;
+			return  false;
 		}
+		cache.remove(key);
 		
-		return  false;
+		return  true;
 		/*
 		throw  new  UnsupportedOperationException( "MASHROOM-PLUGIN:  ** H2  CACHE **  this  operation  is  not  supported." );
 		*/
