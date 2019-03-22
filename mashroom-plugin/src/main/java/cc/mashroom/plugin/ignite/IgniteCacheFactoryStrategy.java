@@ -103,9 +103,9 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 					
 					for( InetSocketAddress  alreadyRegisteredAddress : ObjectUtils.cast(ignite.configuration().getDiscoverySpi(),TcpDiscoverySpi.class).getIpFinder().getRegisteredAddresses() )
 					{
-						JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.ignitemem.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.ignitemem.jdbcUrl","jdbc:ignite:thin://"+alreadyRegisteredAddress.getAddress().getHostAddress()+"/") );
+						JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.memorydb.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.memorydb.jdbcUrl","jdbc:ignite:thin://"+alreadyRegisteredAddress.getAddress().getHostAddress()+"/") );
 						
-						try( Connection  connection= ConnectionFactory.getConnection("ignitemem") )
+						try( Connection  connection = ConnectionFactory.getConnection("memorydb") )
 						{
 							connection.runScripts(      scripts );
 							

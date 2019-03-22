@@ -67,13 +67,13 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	
 	public  void  initialize()  throws  Exception
 	{
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.h2mem.driverClass","org.h2.Driver").addEntry("jdbc.h2mem.jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
+		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.memorydb.driverClass","org.h2.Driver").addEntry("jdbc.memorydb.jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
 		
 		try( InputStream  input = getClass().getResourceAsStream("/memory-policy.ddl") )
 		{
 			if( input   != null )
 			{
-				try( Connection  connection = ConnectionFactory.getConnection("h2mem") )
+				try( Connection  connection       = ConnectionFactory.getConnection("memorydb") )
 				{
 					connection.runScripts( IOUtils.toString(input, "UTF-8") );
 				}
