@@ -22,7 +22,12 @@ import  java.lang.annotation.RetentionPolicy;
 
 public  @interface  DataSource
 {
-	public  String  name();
-	
+	/**
+	 *  data  source  type.  db  for  database  but  cache  for  cache  data  source.
+	 */
 	public  String  type();
+	/**
+	 *  data  source  name.  default:  empty  string.  you  should  supply  a  non-empty  string  for  a  database  data  source,  but  it  is  not  necessary  for  a  cache  data  source  while  the  cache  is  shared  global.
+	 */
+	public  String  name()  default  "";
 }

@@ -26,11 +26,6 @@ public  class  CacheFactory
 	{
 		CacheFactory.strategy   = strategy;
 	}
-
-	public  long  getNextSequence(    String  name )
-	{
-		return  strategy.getNextSequence( name );
-	}
 	
 	public  static  List<XClusterNode>  getClusterNodes()
 	{
@@ -38,7 +33,12 @@ public  class  CacheFactory
 	}
 		
 	private  static  CacheFactoryStrategy  strategy;
-		
+	
+	public  static  long  getNextSequence( String  name )
+	{
+		return  strategy.getNextSequence( name );
+	}
+	
 	public  static  <K,V>  XCache<K,V>  createCache(     String  name )
 	{
 		return  strategy.createCache(name);
