@@ -21,25 +21,25 @@ import  cc.mashroom.db.connection.Connection;
 
 public  class  Db
 {
-	public  static  <T>  T  tx( String  dataSourceName,int  transactionLevel,Callback  callback )  throws  Exception
+	public  static  <T>  T  tx( String  dataSourceName,int  transactionIsolationLevel,Callback  callback )  throws  Exception
 	{
-		try( Connection  connection = ConnectionFactory.getConnection(dataSourceName,false).setAutoCommit(transactionLevel == java.sql.Connection.TRANSACTION_NONE) )
+		try( Connection  connection = ConnectionFactory.getConnection(dataSourceName,false).setAutoCommit(transactionIsolationLevel == java.sql.Connection.TRANSACTION_NONE) )
 		{
 			try
 			{
-				if( transactionLevel != java.sql.Connection.TRANSACTION_NONE )  connection.setTransactionIsolation( transactionLevel );
+				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.setTransactionIsolation( transactionIsolationLevel );
 				
 				T  returned  = (T)  callback.execute( connection );
 				
-				if( transactionLevel != java.sql.Connection.TRANSACTION_NONE )  connection.commit(  );
+				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.commit(  );
 				
 				return  returned;
 			}
 			catch( Throwable  e )
 			{
-				if( transactionLevel != java.sql.Connection.TRANSACTION_NONE )  connection.rollback();
+				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.rollback();
 				
-				throw  new  RuntimeException(   e.getMessage(),e );
+				throw  new  RuntimeException( e.getMessage() , e );
 			}
 			finally
 			{
@@ -47,9 +47,9 @@ public  class  Db
 			}
 		}
 	}
-	
+		
 	public  interface    Callback
 	{
-		public  Object  execute( Connection  connection )   throws  Throwable;
+		public  Object  execute( Connection  connection )  throws  Throwable;
 	}
 }

@@ -12,6 +12,9 @@
 		<dependency >
 			<groupId>cc.mashroom</groupId><artifactId>mashroom-util</artifactId><version>${project.parent.version}</version>
 		</dependency>
+		<dependency >
+			<groupId>cc.mashroom</groupId><artifactId>mashroom-db</artifactId>  <version>${project.parent.version}</version>
+		</dependency>
 	</dependencies>
 	
 	<build >

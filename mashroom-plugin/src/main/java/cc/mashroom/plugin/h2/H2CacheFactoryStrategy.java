@@ -28,6 +28,7 @@ import  org.hyperic.sigar.SigarException;
 import  com.google.common.collect.Lists;
 
 import  cc.mashroom.db.ConnectionFactory;
+import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.config.JDBCConfig;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
@@ -44,13 +45,13 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 {
 	private  XClusterNode  localNode = new  XClusterNode( 0,UUID.randomUUID(),"0.0.0.0",new  HashMap<String,Object>() );
 	
-	public  String  getLocalNodeId()
-	{
-		return      localNode.getId().toString();
-	}
-	
 	private  Sigar  sigar = new  Sigar();
 	
+	public  String  getLocalNodeId()
+	{
+		return this.localNode.getId().toString();
+	}
+		
 	private  Map<String , H2Cache>  caches = new  ConcurrentHashMap<String , H2Cache>();
 	
 	private  Map<String,AtomicLong>  sequenceLongs = new  ConcurrentHashMap<String,AtomicLong>();
@@ -67,13 +68,15 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	
 	public  void  initialize()  throws  Exception
 	{
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.memorydb.driverClass","org.h2.Driver").addEntry("jdbc.memorydb.jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
+		String  memoryDataSourceName = System.getProperty( "memory.datasource.name","memorydb" );
+		
+		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc."+memoryDataSourceName+".driverClass","org.h2.Driver").addEntry("jdbc."+memoryDataSourceName+".jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
 		
 		try( InputStream  input = getClass().getResourceAsStream("/memory-policy.ddl") )
 		{
 			if( input   != null )
 			{
-				try( Connection  connection       = ConnectionFactory.getConnection("memorydb") )
+				try(Connection connection=ConnectionFactory.getConnection(memoryDataSourceName) )
 				{
 					connection.runScripts( IOUtils.toString(input, "UTF-8") );
 				}
@@ -88,15 +91,20 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 		ConnectionFactory.stop();
 	}
 	
+	public  <T>  T  tx( int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception
+	{
+		return  Db.tx( System.getProperty("cachefactory.memorydb.name","memorydb"),transactionIsolationLevel,callback );
+	}
+	
 	public  List<XClusterNode>  getClusterNodes()
 	{
 		try
 		{
 			localNode.getMetrics().addEntry("CURRENT_CPU_LOAD",sigar.getCpuPerc().getCombined()).addEntry("HEAP_MEMORY_MAXIMUM",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax()).addEntry("HEAP_MEMORY_USED",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed()).addEntry("CURRENT_THREAD_COUNT",Thread.getAllStackTraces().size()).addEntry( "MAXIMUM_THREAD_COUNT",null );
 		}
-		catch(SigarException  e )
+		catch(SigarException  se)
 		{
-			e.printStackTrace( );
+			se.printStackTrace();
 		}
 		
 		return  Lists.newArrayList(  localNode );

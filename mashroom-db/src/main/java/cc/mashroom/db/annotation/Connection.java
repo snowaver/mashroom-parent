@@ -24,5 +24,5 @@ public  @interface  Connection
 {
 	public  DataSource  dataSource();
 	
-	public  int  transactionLevel()  default  java.sql.Connection.TRANSACTION_NONE;
+	public  int  transactionIsolationLevel()  default  java.sql.Connection.TRANSACTION_NONE;
 }

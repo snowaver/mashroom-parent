@@ -17,6 +17,7 @@ package cc.mashroom.xcache;
 
 import  java.util.List;
 
+import cc.mashroom.db.common.Db;
 import  cc.mashroom.xcache.util.RemoteCallable;
 
 public  class  CacheFactory
@@ -26,16 +27,26 @@ public  class  CacheFactory
 		CacheFactory.strategy   = strategy;
 	}
 
+	public  long  getNextSequence(    String  name )
+	{
+		return  strategy.getNextSequence( name );
+	}
+	
 	public  static  List<XClusterNode>  getClusterNodes()
 	{
 		return  strategy.getClusterNodes();
 	}
-	
+		
 	private  static  CacheFactoryStrategy  strategy;
 		
 	public  static  <K,V>  XCache<K,V>  createCache(     String  name )
 	{
 		return  strategy.createCache(name);
+	}
+	
+	public  static  <T>  T  tx( int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception
+	{
+		return  strategy.tx(    transactionIsolationLevel , callback );
 	}
 	
 	public  static  <V>  V  call( RemoteCallable<V>  callable,List<String>  clusterNodeIds )

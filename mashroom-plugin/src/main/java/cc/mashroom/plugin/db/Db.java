@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache;
+package cc.mashroom.plugin.db;
 
-import  java.util.List;
+import  cc.mashroom.plugin.Plugin;
 
-import  cc.mashroom.db.common.Db;
-import  cc.mashroom.xcache.util.RemoteCallable;
+import  cc.mashroom.db.ConnectionFactory;
 
-public  interface  CacheFactoryStrategy
+public  class  Db  implements  Plugin
 {
-	public  String  getLocalNodeId();
+	public  void  stop()  { ConnectionFactory.stop(); }
 	
-	public  long  getNextSequence( String  name );
-	
-	public  <T>  T  tx( int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
-	
-	public  List<XClusterNode>  getClusterNodes();
-	
-	public  <K,V>  XCache<K,V>  createCache( String  name );
-	
-	public  <V>  V  call( RemoteCallable<V>  callable,List<String>  clusterNodeIds );
+	public  void  initialize()
+	{
+		try
+		{
+			ConnectionFactory.initialize();
+		}
+		catch(  Exception  e )
+		{
+			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** DB  PLUGIN **  db  initialization  error" );
+		}
+	}
 }
