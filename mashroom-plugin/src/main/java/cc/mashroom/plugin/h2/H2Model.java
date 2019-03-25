@@ -18,7 +18,7 @@ package cc.mashroom.plugin.h2;
 import  cc.mashroom.db.XModel;
 import  cc.mashroom.db.annotation.DataSourceBind;
 
-@DataSourceBind( name="memorydb",table ="*" )
+@DataSourceBind( name = "memorydb",table = "*" )
 
 public  class  H2Model  extends  XModel<H2Model>
 {
