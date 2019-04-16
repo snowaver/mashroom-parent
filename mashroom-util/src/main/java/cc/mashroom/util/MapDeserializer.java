@@ -26,7 +26,6 @@ import  com.fasterxml.jackson.core.TreeNode;
 import  com.fasterxml.jackson.databind.DeserializationContext;
 import  com.fasterxml.jackson.databind.JsonDeserializer;
 import  com.fasterxml.jackson.databind.JsonNode;
-import  com.fasterxml.jackson.databind.node.ArrayNode;
 
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
@@ -75,7 +74,7 @@ public  class  MapDeserializer  extends  JsonDeserializer< Map >
 			
 			TreeNode  value = treeNode.get( fieldName );
 			
-			map.addEntry( fieldName,value instanceof ArrayNode ? deserialize((ArrayNode)  value) : deserializeValue((JsonNode)  value) );
+			map.addEntry(fieldName,value.isContainerNode()? deserialize((JsonNode)  value  /* array  or  object  node */) : deserializeValue((JsonNode)  value) );
 		}
 		
 		return  map;
