@@ -74,7 +74,7 @@ public  class  MapDeserializer  extends  JsonDeserializer< Map >
 			
 			TreeNode  value = treeNode.get( fieldName );
 			
-			map.addEntry(fieldName,value.isContainerNode()? deserialize((JsonNode)  value  /* array  or  object  node */) : deserializeValue((JsonNode)  value) );
+			map.addEntry( fieldName  , value.isContainerNode() ? deserialize((JsonNode)  value  /* array  or  object  node. */) : deserializeValue((JsonNode)  value) );
 		}
 		
 		return  map;
