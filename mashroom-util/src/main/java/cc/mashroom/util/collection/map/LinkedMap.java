@@ -15,6 +15,12 @@
  */
 package cc.mashroom.util.collection.map;
 
+import  java.sql.Timestamp;
+
+import  org.joda.time.DateTime;
+import  org.joda.time.DateTimeZone;
+import  org.joda.time.format.DateTimeFormat;
+
 import  lombok.SneakyThrows;
 
 public  class  LinkedMap<K,V>  extends  org.apache.commons.collections4.map.LinkedMap<K,V>  implements  Map<K,V>
@@ -45,14 +51,30 @@ public  class  LinkedMap<K,V>  extends  org.apache.commons.collections4.map.Link
 	@Override
 	public  V  computeIfLackof(  K  key,Computer<K,V>  computer )
 	{
-		if( !super.containsKey( key ) )
-		{
-			super.put(   key,computer.compute( key ) );
-		}
+		if( !    super.containsKey( key ) )  super.put(     key , computer.compute(key) );
 
 		return  super.get(key);
 	}
 	
+	@Override
+	public  LinkedMap<K,V>  valuesToTimestamp(     K  ...  keys )
+	{
+		return  valuesToTimestamp( "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",DateTimeZone.UTC,keys );
+	}
+	
+	@Override
+	public  LinkedMap<K,V>  valuesToTimestamp( String  datetimeFormat,DateTimeZone  datetimeZone,K  ...  keys )
+	{
+		for(    K  key : keys )
+		{
+			V   value   = super.get( key );
+			
+			if( value != null )  super.put( key,(V)  new  Timestamp(DateTime.parse(super.get(key).toString(),DateTimeFormat.forPattern(datetimeFormat)).withZone(datetimeZone).getMillis()) );
+		}
+		
+		return  this;
+	}
+		
 	@Override
 	public  String  getString( K  key )
 	{
