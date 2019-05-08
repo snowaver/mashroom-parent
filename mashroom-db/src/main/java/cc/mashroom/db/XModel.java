@@ -24,16 +24,11 @@ import  cc.mashroom.db.util.RecordUtils;
 import  cc.mashroom.util.CollectionUtils;
 import  lombok.SneakyThrows;
 
-public  class  XModel<M extends XModel<?>>  extends  Record
+public  class  XModel  <M extends XModel  <?>>  extends  Record
 {
-	public  M  getOne( String  sql, Object...  params )
+	public  M  getOne( String  sql,Object...  params )
 	{
 		return  CollectionUtils.getFirst( search(sql,params) );
-	}
-		
-	public  M  with( String  dataSourceName )
-	{
-		return  (M)  setDataSourceName(dataSourceName);
 	}
 	
 	@SneakyThrows

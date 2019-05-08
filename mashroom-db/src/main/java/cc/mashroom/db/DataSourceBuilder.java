@@ -18,8 +18,8 @@ package cc.mashroom.db;
 import  cc.mashroom.config.Properties;
 import  cc.mashroom.db.config.JDBCConfig;
 import  cc.mashroom.db.connection.ConnectionPool;
-import  cc.mashroom.db.connection.DefaultsConnectionPool;
-import  cc.mashroom.db.connection.SquirrelConnectionPool;
+import  cc.mashroom.db.connection.DefaultConnectionPool;
+import  cc.mashroom.db.connection.AndroidConnectionPool;
 
 public  class  DataSourceBuilder
 {
@@ -29,9 +29,9 @@ public  class  DataSourceBuilder
 		
 		if( properties == null )
 		{
-			throw  new  IllegalArgumentException( String.format("DB:  ** DATASOURCE  BIND **  properties  of  data  source  ( %s )  is  not  found  in  jdbc.properties",dataSourceName) );
+			throw  new  IllegalArgumentException( String.format("DB:  ** DATASOURCE  BIND **  properties  of  data  source  ( %s )  is  not  found  in  jdbc.properties" , dataSourceName) );
 		}
 		
-		return  System.getProperty("java.runtime.name").toLowerCase().contains("android") ? new  SquirrelConnectionPool(properties) : new  DefaultsConnectionPool( dataSourceName,properties );
+		return  System.getProperty("java.runtime.name").toLowerCase().contains("android") ? new  AndroidConnectionPool(properties) : new  DefaultConnectionPool( dataSourceName,properties );
 	}
 }
