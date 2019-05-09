@@ -37,7 +37,9 @@ public  class  ConnectionFactory
 	{
 		Stream.forEach( DATA_SOURCES.values(),new  Consumer<ConnectionPool>(){public  void  consume(ConnectionPool  dataSource)  throws  Exception{ ObjectUtils.cast(dataSource,ComboPooledDataSource.class).close(); }} );
 	}
-	
+	/**
+	 *  use  the  connection  in  connection  thread  reference  or  create  a  new  one  if  no  connection  held  by  connection  thread  reference.  the  connection  will  be  held  by  connection  thread  reference  if  autoCloseable  is  false.
+	 */
 	public  static  Connection  getConnection(String  dataSourceName,boolean  autoClosable )throws  SQLException
 	{
 		if( StringUtils.isBlank(dataSourceName) )
@@ -59,7 +61,9 @@ public  class  ConnectionFactory
 		
 		return  connection;
 	}
-	
+	/**
+	 *  get  the  connection  pool  or  create  a  new  one  by  dataSourceName   if  absent.
+	 */
 	private  static  ConnectionPool  getConnectionPool(       final  String  dataSourceName )
 	{
 		if( StringUtils.isBlank(dataSourceName) )
@@ -76,7 +80,7 @@ public  class  ConnectionFactory
 	}
 	
 	static  DataSourceLocator      DATA_SOURCE_LOCATOR;
-		
+	
 	public  static  Connection  getConnection( String  dataSourceName )  throws  SQLException
 	{
 		return  getConnection( dataSourceName , true );
@@ -86,6 +90,4 @@ public  class  ConnectionFactory
 	{
 		Stream.forEach( JDBCConfig.getProperties().keySet(),new  Consumer<String>(){public  void  consume(String  key)  throws  Exception{ ConnectionFactory.getConnection(key.toString()).close(); }} );
 	}
-	
-
 }
