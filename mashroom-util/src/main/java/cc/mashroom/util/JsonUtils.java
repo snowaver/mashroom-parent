@@ -17,7 +17,6 @@ package cc.mashroom.util;
 
 import  java.text.SimpleDateFormat;
 import  java.util.Map;
-import  java.util.TimeZone;
 
 import  com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,9 +31,9 @@ public  class  JsonUtils
 	static
 	{
 		SimpleDateFormat  greenwichDateFormater = new  SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" );
-		
+		/*
 		greenwichDateFormater.setTimeZone( TimeZone.getTimeZone( "UTC" ) );
-		
+		*/
 		mapper.setDateFormat(greenwichDateFormater).configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES , false );
 		
 		mapper.registerModule( new  SimpleModule().addDeserializer(cc.mashroom.util.collection.map.Map.class,new  MapDeserializer()) );
