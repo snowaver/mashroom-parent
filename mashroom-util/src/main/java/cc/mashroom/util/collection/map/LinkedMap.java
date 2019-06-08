@@ -57,6 +57,19 @@ public  class  LinkedMap<K,V>  extends  org.apache.commons.collections4.map.Link
 	}
 	
 	@Override
+	public  Map<K,V>  valuesToLong( K  ...  keys )
+	{
+		for(    K  key : keys )
+		{
+			V   value   = super.get( key );
+			
+			if( value != null )         super.put( key,(V)  new  Long(value.toString()) );
+		}
+		
+		return  this;
+	}
+	
+	@Override
 	public  LinkedMap<K,V>  valuesToTimestamp(     K  ...  keys )
 	{
 		return  valuesToTimestamp( "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",DateTimeZone.UTC,keys );

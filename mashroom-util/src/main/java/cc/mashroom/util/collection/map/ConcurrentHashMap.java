@@ -15,11 +15,11 @@
  */
 package cc.mashroom.util.collection.map;
 
-import java.sql.Timestamp;
+import  java.sql.Timestamp;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
+import  org.joda.time.DateTime;
+import  org.joda.time.DateTimeZone;
+import  org.joda.time.format.DateTimeFormat;
 
 import  lombok.SneakyThrows;
 
@@ -51,6 +51,19 @@ public  class  ConcurrentHashMap<K,V>  extends  java.util.concurrent.ConcurrentH
 		}
 
 		return  super.get(key);
+	}
+	
+	@Override
+	public  Map<K,V>  valuesToLong( K  ...  keys )
+	{
+		for(    K  key : keys )
+		{
+			V   value   = super.get( key );
+			
+			if( value != null )         super.put( key,(V)  new  Long(value.toString()) );
+		}
+		
+		return  this;
 	}
 	
 	@Override

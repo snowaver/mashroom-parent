@@ -19,6 +19,8 @@ import  org.joda.time.DateTimeZone;
 
 public  interface  Map<K,V>  extends  java.util.Map<K,V>
 {
+	public  Map<K,V>  valuesToLong(K  ...  keys );
+	
 	public  Map<K,V>  valuesToTimestamp( K  ...  keys );
 	/**
 	 *  replace  the  computeIfAbsent  method  while  considering  jdk7  or  lower  version  dose  not  contains  it.
