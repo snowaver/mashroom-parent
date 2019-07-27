@@ -18,7 +18,6 @@ package cc.mashroom.xcache;
 import  java.util.List;
 
 import  cc.mashroom.db.common.Db;
-import  cc.mashroom.xcache.util.RemoteCallable;
 
 public  interface  CacheFactoryStrategy
 {
@@ -26,11 +25,13 @@ public  interface  CacheFactoryStrategy
 	
 	public  long  getNextSequence( String  name );
 	
-	public  <T>  T  tx( int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
+	public  <V>  V  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
 	
 	public  List<XClusterNode>  getClusterNodes();
 	
-	public  <K,V>  XCache<K,V>  createCache( String  name );
+	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name );
 	
-	public  <V>  V  call( RemoteCallable<V>  callable,List<String>  clusterNodeIds );
+	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache( String  name );
+	
+	public  <V>  V  call( RemoteCallable  <V>  callable,List<String> clusterNodeIds );
 }

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache.strategies;
+package cc.mashroom.xcache;
 
 import  java.util.List;
 
-import  cc.mashroom.xcache.XCache;
-
-public  interface  XMemTableCache<K,V>  extends  XCache<K, V>
+public  interface  XMemTableCache<K,V>  extends  XCacheStrategy<K, V>
 {
 	public  boolean  update( String  sql,Object...  params );
 	

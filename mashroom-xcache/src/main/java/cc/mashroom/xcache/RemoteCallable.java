@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache.rpcs;
+package cc.mashroom.xcache;
+
+import  java.util.concurrent.Callable;
 
 import  cc.mashroom.util.collection.map.Map;
-import  cc.mashroom.xcache.util.RemoteCallable;
 import  lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public  class  RemoteEventCallable<V>  implements  RemoteCallable<V>
+public  class  RemoteCallable<V>  implements  Callable<V>
 {
 	private  int  eventType;
 	
@@ -28,6 +29,6 @@ public  class  RemoteEventCallable<V>  implements  RemoteCallable<V>
 	
 	public  V  call()  throws  Exception
 	{
-		return  (V)  RemoteEventHandler.getInstance().handle( eventType, parameters );
+		return  (V)  RemoteEventProcessorDelegate.INSTANCE.handle( eventType,parameters );
 	}
 }

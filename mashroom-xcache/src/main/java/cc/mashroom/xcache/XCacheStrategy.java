@@ -15,26 +15,9 @@
  */
 package cc.mashroom.xcache;
 
-import  java.util.List;
 import  java.util.concurrent.locks.Lock;
 
-import  cc.mashroom.util.collection.map.Map;
-
-public  interface  XCache<K,V>
+public  interface  XCacheStrategy<K,V>
 {
-	public  V  get( K  key  );
-	
-	public  V  get( K  key,Class<V>  clazz );
-	
-	public  boolean  remove( K  key );
-	
-	public  boolean  put( K  key,V  object );
-	
 	public  Lock  getLock(   K  key );
-	
-	public  List<Map<String,Object>>  search( String  sql,Object...  params );
-	
-	public  Map<String,Object>  getOne( String  sql,Object...  params );
-	
-	public  boolean  update( String  sql,Object...  params );
 }

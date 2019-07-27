@@ -16,7 +16,7 @@
 package cc.mashroom.xcache;
 
 import  cc.mashroom.util.collection.map.Map;
-
+@Deprecated
 public  interface  SerializableStrategy<S>
 {
 	public  Map<String,Object>  read( S  serializedObject );

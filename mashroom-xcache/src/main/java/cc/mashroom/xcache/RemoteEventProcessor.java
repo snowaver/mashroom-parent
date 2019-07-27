@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache.rpcs;
+package cc.mashroom.xcache;
 
 import  cc.mashroom.util.collection.map.Map;
 
-public  interface  Processor
+public  interface  RemoteEventProcessor
 {
-	public  Object  process( int  eventType,Map<String,Object>  parameters );
+	public  <T>  T process( int  eventType,Map<String,Object>  parameters );
 }

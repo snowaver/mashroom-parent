@@ -17,7 +17,7 @@ package cc.mashroom.xcache;
 
 import  java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import  com.fasterxml.jackson.annotation.JsonProperty;
 
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
