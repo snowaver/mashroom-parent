@@ -47,9 +47,10 @@ import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  cc.mashroom.xcache.CacheFactory;
 import  cc.mashroom.xcache.CacheFactoryStrategy;
-import  cc.mashroom.xcache.XCache;
+import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
-import  cc.mashroom.xcache.util.RemoteCallable;
+import  cc.mashroom.xcache.XKeyValueCache;
+import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.SneakyThrows;
 
 public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , Plugin
@@ -88,7 +89,7 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 		return  clusterClientNodes;
 	}
 	
-	private  Ignite     ignite;
+	private  Ignite  ignite;
 	
 	public  void  stop()
 	{
@@ -96,7 +97,7 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	}
 		
 	@SneakyThrows
-	public   void  initialize()
+	public   void  initialize(            Object  ...  parameters )
 	{
 		this.ignite = Ignition.start( System.getProperty("ignite.spring.config-file","ignite-config.xml") );
 		
@@ -112,7 +113,10 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 					
 					for( InetSocketAddress  address : ObjectUtils.cast(ignite.configuration().getDiscoverySpi(),TcpDiscoverySpi.class).getIpFinder().getRegisteredAddresses() )
 					{
-						if( initialized = runScript(sqlScript,System.getProperty("memory.datasource.name","memorydb"),address) )  break;
+						if( initialized=runScript(sqlScript,"xcache-memtable-datasource",address) )
+						{
+							break;
+						}
 					}
 					
 					if( !initialized )  throw  new  IllegalStateException(  "SQUIRREL-PLUGIN:  ** IGNITE  CACHE  FACTORY  STRATEGY **  can  not  execute  the  sql  script." );
@@ -142,11 +146,11 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	
 	protected  boolean  runScript( String  sqlScript , String  dataSourceName , InetSocketAddress  address )
 	{
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc."+System.getProperty("memory."+dataSourceName+".name","memorydb")+".driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc."+dataSourceName+".jdbcUrl","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/") );
+		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/") );
 		
-		try(Connection  connection= ConnectionFactory.getConnection(dataSourceName) )
+		try(Connection  connection= ConnectionFactory.getConnection("xcache-memtable-datasource") )
 		{
-			connection.runScripts(  sqlScript );      return  true;
+			connection.runScripts(  sqlScript );     return  true;
 		}
 		catch(    Throwable  rsst )
 		{
@@ -156,23 +160,28 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 		return  false;
 	}
 	
-	public  <K,V>  XCache<K,V>  createCache(   String  name )
+	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache(      String  name )
 	{
-		return  new  IgniteCache( ignite.getOrCreateCache( name) );
+		return  new  IgniteKeyValueCache( this.ignite.getOrCreateCache(name) );
+	}
+	
+	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache(      String  name )
+	{
+		return  new  IgniteMemTableCache( this.ignite.getOrCreateCache(name) );
 	}
 	
 	public  String getLocalNodeId()
 	{
-		return  ignite.cluster().localNode().id().toString();
+		return  this.ignite.cluster().localNode().id().toString();
 	}
 	
 	public  long  getNextSequence(String  name )
 	{
-		return  ignite.atomicLong(name, 0, true).incrementAndGet();
+		return  this.ignite.atomicLong(name, 0, true).incrementAndGet();
 	}
 		
 	private  ClusterGroup  createClusterGroup( final  Set< String >  clusterNodeIds )
 	{
-		return  ignite.cluster().forPredicate( new  IgnitePredicate<ClusterNode>(){public  boolean  apply(ClusterNode  clusterNode){return  clusterNodeIds.contains(clusterNode.id().toString());}} );
+		return  this.ignite.cluster().forPredicate( new  IgnitePredicate<ClusterNode>(){public  boolean  apply(ClusterNode  clusterNode){return  clusterNodeIds.contains(clusterNode.id().toString());}} );
 	}
 }

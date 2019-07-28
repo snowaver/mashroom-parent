@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache;
+package cc.mashroom.db.annotation;
 
-import  java.util.List;
+import  java.lang.annotation.Retention;
+import  java.lang.annotation.RetentionPolicy;
 
-public  interface  XMemTableCache<K,V>  extends  XCacheStrategy<K,V>
+@Retention( RetentionPolicy.RUNTIME )
+
+public  @interface  Column
 {
-	public  boolean  update( String  sql,Object...  params );
-	
-	public  List<V>  lookup( String  sql,Object...  params );
-	
-	public  V  lookupOne( String  sql,Object...  params );
+	public  String  name();
 }

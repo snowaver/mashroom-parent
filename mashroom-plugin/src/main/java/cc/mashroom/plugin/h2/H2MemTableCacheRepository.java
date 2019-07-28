@@ -15,12 +15,13 @@
  */
 package cc.mashroom.plugin.h2;
 
-import  cc.mashroom.db.XModel;
+import  cc.mashroom.db.GenericRepository;
 import  cc.mashroom.db.annotation.DataSourceBind;
+import  cc.mashroom.util.collection.map.HashMap;
 
-@DataSourceBind( name = "memorydb",table = "*" )
+@DataSourceBind( name="xcache-memtable-datasource",table="*" )
 
-public  class  H2Model  extends  XModel<H2Model>
+public  class  H2MemTableCacheRepository  extends  GenericRepository<HashMap<String,Object>>
 {
-	public  final  static  H2Model  dao = new  H2Model();
+	
 }

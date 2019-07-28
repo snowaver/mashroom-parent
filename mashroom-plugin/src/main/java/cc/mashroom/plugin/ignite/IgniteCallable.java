@@ -15,19 +15,16 @@
  */
 package cc.mashroom.plugin.ignite;
 
-import  cc.mashroom.xcache.util.RemoteCallable;
+import  cc.mashroom.xcache.RemoteCallable;
+import  lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public  class  IgniteCallable<V>  implements  org.apache.ignite.lang.IgniteCallable<V>
 {
-	public  IgniteCallable( RemoteCallable<V>  callable )
-	{
-		this.callable = callable;
-	}
-	
 	private  RemoteCallable<V>  callable;
 	
 	public  V  call()   throws  Exception
 	{
-		return   callable.call();
+		return  callable.call();
 	}
 }

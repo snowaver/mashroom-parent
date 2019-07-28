@@ -23,7 +23,7 @@ public  class  Db  implements  Plugin
 {
 	public  void  stop()  { ConnectionFactory.stop(); }
 	
-	public  void  initialize()
+	public  void  initialize( Object  ...  parameters )
 	{
 		try
 		{

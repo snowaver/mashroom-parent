@@ -37,13 +37,14 @@ import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  cc.mashroom.xcache.CacheFactory;
 import  cc.mashroom.xcache.CacheFactoryStrategy;
-import  cc.mashroom.xcache.XCache;
+import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
-import  cc.mashroom.xcache.util.RemoteCallable;
+import  cc.mashroom.xcache.XKeyValueCache;
+import  cc.mashroom.xcache.XMemTableCache;
 
-public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
+public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 {
-	private  XClusterNode  localNode = new  XClusterNode( 0,UUID.randomUUID(),"0.0.0.0",new  HashMap<String,Object>() );
+	private  XClusterNode  localNode = new  XClusterNode( 0, UUID.randomUUID() , "0.0.0.0" , new  HashMap<String,Object>() );
 	
 	private  Sigar  sigar = new  Sigar();
 	
@@ -51,34 +52,46 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	{
 		return this.localNode.getId().toString();
 	}
-		
-	private  Map<String , H2Cache>  caches = new  ConcurrentHashMap<String , H2Cache>();
+	
+	private  H2MemTableCacheRepository  cacheRepository= new  H2MemTableCacheRepository();
+	
+	private  Map<String,H2KeyValueCache>  keyValueCaches = new  ConcurrentHashMap<String,H2KeyValueCache>();
 	
 	private  Map<String,AtomicLong>  sequenceLongs = new  ConcurrentHashMap<String,AtomicLong>();
 	
-	public  <V>  V  call( RemoteCallable< V >  callable,List< String >  clusterNodeIds )
+	private  Map<String,H2MemTableCache>  memTableCaches = new  ConcurrentHashMap<String,H2MemTableCache>();
+	
+	public  <V>  V  call( RemoteCallable<V>  remoteCallable,List<String>  clusterNodeIds )
 	{
 		throw  new  UnsupportedOperationException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  this  operation  is  not  supported  for  single  node  server" );
 	}
 	
-	public  <K,V>  XCache<K,V>  createCache( String  name )
+	public  <T>  T  tx( int  transactionIsolationLevel , Db.Callback  callback )throws  Exception
 	{
-		return  caches.computeIfLackof(name,new  Map.Computer<String,H2Cache>(){public  H2Cache  compute(String  key)  throws  Exception{return  new  H2Cache<K,V>(key);}});
+		return  Db.tx( "xcache-memtable-datasource", transactionIsolationLevel,callback );
 	}
 	
-	public  void  initialize()  throws  Exception
+	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )
 	{
-		String  memoryDataSourceName = System.getProperty( "memory.datasource.name","memorydb" );
+		return  keyValueCaches.computeIfLackof(name,new  Map.Computer<String,H2KeyValueCache>(){public  H2KeyValueCache  compute(String  key)  throws  Exception{return  new  H2KeyValueCache<K,V>(key);}});
+	}
+	
+	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache( String  name )
+	{
+		return  memTableCaches.computeIfLackof(name,new  Map.Computer<String,H2MemTableCache>(){public  H2MemTableCache  compute(String  key)  throws  Exception{return  new  H2MemTableCache<K,V>(key,cacheRepository);}});
+	}
+	
+	public  void  initialize(       Object  ...  parameters )  throws  Exception
+	{
+		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.h2.Driver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
 		
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc."+memoryDataSourceName+".driverClass","org.h2.Driver").addEntry("jdbc."+memoryDataSourceName+".jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
-		
-		try( InputStream  input = getClass().getResourceAsStream("/memory-policy.ddl") )
+		try( InputStream  input = getClass().getResourceAsStream(System.getProperty("xcache.memtable.ddl.location","/memory-policy.ddl")) )
 		{
 			if( input   != null )
 			{
-				try(Connection connection=ConnectionFactory.getConnection(memoryDataSourceName) )
+				try(Connection  connection = ConnectionFactory.getConnection("xcache-memtable-datasource") )
 				{
-					connection.runScripts( IOUtils.toString(input, "UTF-8") );
+					connection.runScripts( IOUtils.toString( input, "UTF-8" ) );
 				}
 			}
 		}
@@ -89,11 +102,6 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy,Plugin
 	public  void  stop()
 	{
 		ConnectionFactory.stop();
-	}
-	
-	public  <T>  T  tx( int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception
-	{
-		return  Db.tx( System.getProperty("cachefactory.memorydb.name","memorydb"),transactionIsolationLevel,callback );
 	}
 	
 	public  List<XClusterNode>  getClusterNodes()
