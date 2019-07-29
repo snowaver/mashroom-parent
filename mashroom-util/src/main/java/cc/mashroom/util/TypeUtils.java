@@ -13,25 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.plugin.db;
+package cc.mashroom.util;
 
-import  cc.mashroom.plugin.Plugin;
+import  javax.annotation.Nonnull;
+import  javax.annotation.Nullable;
 
-import  cc.mashroom.db.ConnectionManager;
-
-public  class  Db  implements  Plugin
+public  class  TypeUtils
 {
-	public  void  initialize( Object  ...  parameters )
+	public  static  boolean  isPresent( @Nonnull  String  className,@Nullable  ClassLoader  classLoader )
 	{
 		try
 		{
-			ConnectionManager.INSTANCE.initialize(  parameters );
+			if( classLoader == null )
+			{
+				Class.forName( className );
+			}
+			else
+			{
+				classLoader.loadClass( className );
+			}
+			
+			return   true;
 		}
-		catch(  Exception  e )
+		catch(  ClassNotFoundException  e )
 		{
-			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** DB  PLUGIN **  db  initialization  error" );
+			return  false;
 		}
 	}
-	
-	public  void  stop(){ ConnectionManager.INSTANCE.release(); }
 }

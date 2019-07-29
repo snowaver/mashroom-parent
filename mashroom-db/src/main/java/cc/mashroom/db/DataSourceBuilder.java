@@ -15,23 +15,33 @@
  */
 package cc.mashroom.db;
 
+import  org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+
 import  cc.mashroom.config.Properties;
 import  cc.mashroom.db.config.JDBCConfig;
 import  cc.mashroom.db.connection.ConnectionPool;
-import  cc.mashroom.db.connection.DefaultConnectionPool;
-import  cc.mashroom.db.connection.AndroidConnectionPool;
+import  cc.mashroom.db.connection.Connection;
+import  cc.mashroom.db.connection.ConnectionFactory;
 
 public  class  DataSourceBuilder
 {
 	public  final  static  ConnectionPool  build( String  dataSourceName )  throws  Exception
 	{
-		Properties  properties = JDBCConfig.getProperties( dataSourceName );
+		Properties  properties = JDBCConfig.getProperties(dataSourceName );
 		
 		if( properties == null )
 		{
-			throw  new  IllegalArgumentException( String.format("DB:  ** DATASOURCE  BIND **  properties  of  data  source  ( %s )  is  not  found  in  jdbc.properties" , dataSourceName) );
+			throw  new  IllegalArgumentException( String.format("MASHROOM-DB:  ** DATASOURCE  BUILDER **  properties  of  data  source  ( %s )  is  not  found  in  jdbc.properties",dataSourceName) );
 		}
 		
-		return  System.getProperty("java.runtime.name").toLowerCase().contains("android") ? new  AndroidConnectionPool(properties) : new  DefaultConnectionPool( dataSourceName,properties );
+		GenericObjectPoolConfig<Connection>  poolConfig =  new  GenericObjectPoolConfig<Connection>();
+		
+		poolConfig.setMinIdle(        properties.getInt("minPoolSize",2) );
+		
+		poolConfig.setMaxIdle(        properties.getInt("maxPoolSize",4) );
+		
+		poolConfig.setTimeBetweenEvictionRunsMillis( properties.getInt("idleConnectionTestPeriod",120*1000) );
+		
+		return  new  ConnectionPool( dataSourceName,new  ConnectionFactory(dataSourceName,properties),poolConfig );
 	}
 }

@@ -15,7 +15,7 @@
  */
 package cc.mashroom.db.common;
 
-import  cc.mashroom.db.ConnectionFactory;
+import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.ConnectionThreadReference;
 import  cc.mashroom.db.connection.Connection;
 
@@ -23,7 +23,7 @@ public  class  Db
 {
 	public  static  <T>  T  tx( String  dataSourceName,int  transactionIsolationLevel,Callback  callback )  throws  Exception
 	{
-		try( Connection  connection = ConnectionFactory.getConnection(dataSourceName,false).setAutoCommit(transactionIsolationLevel == java.sql.Connection.TRANSACTION_NONE) )
+		try( Connection  connection = ConnectionManager.INSTANCE.getConnection(dataSourceName,false).setAutoCommit(transactionIsolationLevel == java.sql.Connection.TRANSACTION_NONE) )
 		{
 			try
 			{

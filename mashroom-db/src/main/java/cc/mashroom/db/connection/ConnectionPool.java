@@ -15,12 +15,41 @@
  */
 package cc.mashroom.db.connection;
 
-import  java.sql.Connection;
-import  java.sql.SQLException;
+import  org.apache.commons.pool2.impl.AbandonedConfig;
+import  org.apache.commons.pool2.impl.GenericObjectPool;
+import  org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
-public  interface  ConnectionPool
-{
-	public  Connection  getConnection()  throws  SQLException;
+import  lombok.Getter;
+
+public  class  ConnectionPool  extends  GenericObjectPool<Connection>
+{	
+	public  ConnectionPool( String  dataSourceName,ConnectionFactory  factory )
+	{
+		super( factory );
+		
+		factory.setConnectionPool(    this );
+		
+		this.dataSourceName = dataSourceName;
+	}
 	
-	public  void  release();
+	public  ConnectionPool( String  dataSourceName,ConnectionFactory  factory,GenericObjectPoolConfig<Connection>  poolConfig )
+	{
+		super( factory,poolConfig );
+		
+		factory.setConnectionPool(    this );
+		
+		this.dataSourceName = dataSourceName;
+	}
+
+	public  ConnectionPool( String  dataSourceName,ConnectionFactory  factory,GenericObjectPoolConfig<Connection>  poolConfig,AbandonedConfig  abandonedConfig )
+	{
+		super( factory,poolConfig,abandonedConfig );
+		
+		factory.setConnectionPool(    this );
+		
+		this.dataSourceName = dataSourceName;
+	}
+	
+	@Getter
+	private  String  dataSourceName;
 }

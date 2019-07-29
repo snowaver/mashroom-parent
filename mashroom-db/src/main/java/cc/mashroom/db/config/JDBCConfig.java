@@ -15,7 +15,11 @@
  */
 package cc.mashroom.db.config;
 
+import  java.util.HashSet;
 import  java.util.Map.Entry;
+import  java.util.Set;
+
+import  javax.annotation.Nonnull;
 
 import  cc.mashroom.config.Config;
 import  cc.mashroom.config.Properties;
@@ -24,34 +28,65 @@ import  cc.mashroom.util.collection.map.Map;
 
 public  class  JDBCConfig
 {
-	private  final  static  Map<String,Properties>  properties  = new  ConcurrentHashMap<String,Properties>();
+	private  final  static  Map<String,Properties>  PROPERTIES = new  ConcurrentHashMap<String,Properties>();
 
 	static
 	{
-		for( Entry<Object,Object>  entry : Config.use("jdbc.properties").entrySet() )
+		for(          Entry<Object,Object>  entry : Config.use("jdbc.properties").entrySet() )
 		{
-			properties.computeIfLackof(String.valueOf(entry.getKey()).split("\\.")[1],new  Map.Computer<String,Properties>(){public  Properties  compute(String  key)  throws  Exception{ return  new  Properties(); }}).put( String.valueOf(entry.getKey()).split("\\.")[2],entry.getValue() );
+			PROPERTIES.computeIfLackof(String.valueOf(entry.getKey()).split("\\.")[1],new  Map.Computer<String,Properties>(){public  Properties  compute(String  key)  throws  Exception{ return  new  Properties(); }}).put( String.valueOf(entry.getKey()).split("\\.")[2],entry.getValue() );
 		}
 	}
 	
-	public  static  void  addDataSource( Map<String,Object>  dataSource )
+	public  static  Set<String> getDataSourceNames()
 	{
-		for( Entry<String,Object>  entry : dataSource.entrySet() )
+		return          new  HashSet<String>( PROPERTIES.keySet() );
+	}
+	
+	public  static  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
+	{
+		if( PROPERTIES.containsKey(dataSourceName) )
 		{
-			properties.computeIfLackof(String.valueOf(entry.getKey()).split("\\.")[1],new  Map.Computer<String,Properties>(){public  Properties  compute(String  key)  throws  Exception{ return  new  Properties(); }}).put( String.valueOf(entry.getKey()).split("\\.")[2],entry.getValue() );
+			throw  new  IllegalStateException( String.format("MASHROOM-DB:  ** JDBC  CONFIG **  data  source  ( %s )  exists.",dataSourceName) );
+		}
+		
+		Properties  properties  = new  Properties();
+		
+		properties.put( "jdbc."+dataSourceName+".driverClass",driverClassName );
+		
+		properties.put( "jdbc."+dataSourceName+".jdbcUrl",jdbcUrl );
+		
+		if( user != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".user",  user );
+		}
+		if( password != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".password",      password );
+		}
+		if( minPoolSize != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".minPoolSize",minPoolSize );
+		}
+		if( preferredTestQuery != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".preferredTestQuery",preferredTestQuery );
+		}
+		if( maxPoolSize != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".maxPoolSize",maxPoolSize );
+		}
+		if( idleConnectionTestPeriod != null )
+		{
+			properties.put( "jdbc."+dataSourceName+".idleConnectionTestPeriod" ,  idleConnectionTestPeriod );
 		}
 	}
 	
-	public  static  Map<String,Properties>  getProperties()
+	public  static  Properties  getProperties(String dataSourceName)
 	{
-		return  properties;
-	}
-	
-	public  static  Properties  getProperties(   String  dataSourceName )
-	{
-		if( properties.containsKey(dataSourceName) )
+		if( PROPERTIES.containsKey(dataSourceName) )
 		{
-			return  properties.get(dataSourceName );
+			return  PROPERTIES.get(dataSourceName );
 		}
 		
 		throw  new  IllegalStateException( String.format("DB:  ** JDBC  CONFIG **  data  source  ( %s )  is  not  configured  in  jdbc.properties",dataSourceName) );

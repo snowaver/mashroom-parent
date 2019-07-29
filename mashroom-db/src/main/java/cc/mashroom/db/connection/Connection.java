@@ -37,6 +37,9 @@ public  class  Connection   implements  AutoCloseable
 {
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )
+	protected  ConnectionPool    connectionPool;
+	@Setter( value= AccessLevel.PROTECTED )
+	@Accessors( chain=true )
 	protected  java.sql.Connection   connection;
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )

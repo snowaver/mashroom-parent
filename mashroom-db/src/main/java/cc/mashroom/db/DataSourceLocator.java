@@ -22,5 +22,5 @@ public  interface  DataSourceLocator
 	/*
 	 *  returns  the  data  source  name  that  can  be  customized.
 	 */
-	public  <M>  String  locate( GenericRepository<M>  repository,DataSourceBind  dataSourceBind );
+	public  <M>  String  locate( GenericRepository  repository,DataSourceBind  dataSourceBind );
 }
