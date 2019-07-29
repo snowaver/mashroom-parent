@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.db.util;
+package cc.mashroom.plugin.ignite;
 
 import  java.beans.IntrospectionException;
 import  java.beans.PropertyDescriptor;
 import  java.lang.reflect.Field;
 import  java.lang.reflect.InvocationTargetException;
-import  java.sql.ResultSet;
-import  java.sql.ResultSetMetaData;
 import  java.sql.SQLException;
 import  java.util.LinkedList;
 import  java.util.List;
+
+import  org.apache.ignite.cache.query.FieldsQueryCursor;
 
 import  cc.mashroom.db.annotation.Column;
 import  cc.mashroom.util.ObjectUtils;
@@ -37,13 +37,13 @@ public  class  RecordUtils
 {
 	private final  static  Map<String,PropertyDescriptor>  PROPERTY_DESCRIPTOR_CACHE = new  ConcurrentHashMap<String,PropertyDescriptor>();
 	
-	public  static  <T>  List<T>  list(       ResultSet  resultSet,Class<T>  clazz )  throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
+	public  static  <T>  List<T>  list( FieldsQueryCursor<List<Object>>  cursor, Class<T>  clazz )      throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
 	{
-		List<T>  result   = new  LinkedList<T>();
+		List<T>  result  =  new  LinkedList<T>();
 		
-		while( resultSet.next() )
+		for( List<Object>  values : cursor.getAll() )
 		{
-			result.add( (T)  fillColumns(java.util.Map.class.isAssignableFrom(clazz) ? new  HashMap<String,Object>() : clazz.newInstance(),java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
+			result.add( (T)  fillColumns(java.util.Map.class.isAssignableFrom(clazz) ? new  HashMap<String,Object>() : clazz.newInstance(),java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),cursor,values) );
 		}
 		
 		return  result;
@@ -61,19 +61,19 @@ public  class  RecordUtils
 		return  columnBeanFieldMapper;
 	}
 	
-	public  static  <T>  T  fillColumns( final  T  record,Map<String,String>  columnBeanFieldMapper,ResultSetMetaData  metadata,ResultSet  rs )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	public  static  <T>  T  fillColumns( final  T  record,Map<String,String>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		for( int  i = 1;i <= metadata.getColumnCount()-1;i = i+1 )
+		for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+1 )
 		{
 			if( record instanceof java.util.Map )
 			{
-				ObjectUtils.cast(record,Map.class).put( metadata.getColumnLabel(i),FieldsConverter.convert(metadata.getColumnTypeName(i),rs.getObject(i)) );
+				ObjectUtils.cast(record,Map.class).put(    cursor.getFieldName(i),values.get(i) );
 			}
 			else
 			{
-				String  fn = columnBeanFieldMapper.get( metadata.getColumnLabel(i));
+				String  fn = columnBeanFieldMapper.get(    cursor.getFieldName(i) );
 				
-				PROPERTY_DESCRIPTOR_CACHE.computeIfLackof(record.getClass().getName()+"."+fn,new  Computer<String,PropertyDescriptor>(){public PropertyDescriptor compute(String  key)  throws  Exception{return  new  PropertyDescriptor(key,record.getClass());}}).getWriteMethod().invoke( record,FieldsConverter.convert(metadata.getColumnTypeName(i),rs.getObject(i)) );
+				PROPERTY_DESCRIPTOR_CACHE.computeIfLackof(record.getClass().getName()+"."+fn,new  Computer<String,PropertyDescriptor>(){public PropertyDescriptor compute(String  key)  throws  Exception{return  new  PropertyDescriptor(key,record.getClass());}}).getWriteMethod().invoke( record,values.get(i) );
 			}
 		}
 		

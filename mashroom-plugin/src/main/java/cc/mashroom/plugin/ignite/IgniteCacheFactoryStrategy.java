@@ -36,10 +36,9 @@ import  org.apache.ignite.transactions.TransactionIsolation;
 
 import  com.fasterxml.jackson.core.type.TypeReference;
 
-import  cc.mashroom.db.ConnectionFactory;
+import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
-import cc.mashroom.db.util.DataSourceUtils;
 import  cc.mashroom.plugin.Plugin;
 import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.StringUtils;
@@ -146,11 +145,14 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	
 	protected  boolean  runScript( String  sqlScript , String  dataSourceName , InetSocketAddress  address )
 	{
-		DataSourceUtils.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/") );
-		
-		try(Connection  connection= ConnectionFactory.getConnection("xcache-memtable-datasource") )
+		if( ConnectionManager.INSTANCE.addDataSource("org.apache.ignite.IgniteJdbcThinDriver","xcache-memtable-datasource","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/",null,null,2,4,null,"SELECT  2") )
 		{
-			connection.runScripts(  sqlScript );     return  true;
+			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  error  while  adding  memtable  data  source" );
+		}
+		
+		try(Connection  connection= ConnectionManager.INSTANCE.getConnection("xcache-memtable-datasource") )
+		{
+			connection.runScripts(  sqlScript );      return  true;
 		}
 		catch(    Throwable  rsst )
 		{
@@ -172,7 +174,7 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	
 	public  String getLocalNodeId()
 	{
-		return  this.ignite.cluster().localNode().id().toString();
+		return  this.ignite.cluster().localNode().id().toString( );
 	}
 	
 	public  long  getNextSequence(String  name )

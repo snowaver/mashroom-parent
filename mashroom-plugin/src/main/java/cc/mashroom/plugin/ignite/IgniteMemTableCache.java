@@ -15,18 +15,15 @@
  */
 package cc.mashroom.plugin.ignite;
 
-import  java.util.Iterator;
-import  java.util.LinkedList;
 import  java.util.List;
 import  java.util.concurrent.locks.Lock;
 
 import  org.apache.ignite.cache.query.FieldsQueryCursor;
 import  org.apache.ignite.cache.query.SqlFieldsQuery;
 
-import  cc.mashroom.util.collection.map.HashMap;
-import  cc.mashroom.util.collection.map.Map;
 import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.Setter;
+import  lombok.SneakyThrows;
 
 public  class  IgniteMemTableCache<K,V>  implements  XMemTableCache<K,V>
 {
@@ -45,40 +42,29 @@ public  class  IgniteMemTableCache<K,V>  implements  XMemTableCache<K,V>
 		return  this.xcache.lock( key );
 	}
 	
-	public  boolean  update( String  sql,Object...  params )
+	public  boolean  update(   String  sql,Object...  params )
 	{
 		return  !xcache.query(new  SqlFieldsQuery(sql).setArgs(params)).getAll().isEmpty();
 	}
 	
-	private  Map<String,Object>  fillColumns( Map<String,Object>  record,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )
+	public  <T>  T  lookupOne(    Class<T>  resultBeanClazz,String  sql,Object...  params )
 	{
-		for( int  i = 0;i <= values.size()-1;i = i+1 )
+		List<T>  rcs = lookup( resultBeanClazz, sql, params );
+		
+		if( rcs.size() >= 2 )
 		{
-			record.addEntry( cursor.getFieldName(i),values.get(i) );
+			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** IGNITE  MEM  TABLE  CACHE **  unique  constrains,  but  found  %d",rcs.size()) );
 		}
 		
-		return  record;
+		return  rcs.isEmpty() ? null : rcs.get( 0 );
 	}
 	
-	public  V  lookupOne(    String  sql,Object...  params )
+	@SneakyThrows
+	public  <T>  List<T>  lookup( Class<T>  resultBeanClazz,String  sql,Object...  params )
 	{
-		List<V>  rcds = lookup( sql,params );
-		
-		if( rcds.size() >= 2 )
-		{
-			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** IGNITE  MEM  TABLE  CACHE **  unique  constrains,  but  found  %d",rcds.size()) );
-		}
-		
-		return  rcds.isEmpty() ? null : rcds.get( 0 );
-	}
-	
-	public  List<V>  lookup( String  sql,Object...  params )
-	{
-		List<Map<String,Object>>  list = new  LinkedList<Map<String,Object>>();
-		
 		try( FieldsQueryCursor<List<Object>>  cursor =xcache.query(new  SqlFieldsQuery(sql).setArgs(params)) )
 		{
-			for( Iterator<List<Object>>  iterator = cursor.iterator();iterator.hasNext(); )  list.add( fillColumns(new HashMap<String,Object>(),cursor,iterator.next()) );  return  (List<V>)  list;
+			return  RecordUtils.list(cursor,resultBeanClazz );
 		}
 	}
 }
