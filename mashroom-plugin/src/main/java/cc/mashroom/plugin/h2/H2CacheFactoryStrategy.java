@@ -27,9 +27,8 @@ import  org.hyperic.sigar.SigarException;
 
 import  com.google.common.collect.Lists;
 
-import  cc.mashroom.db.ConnectionFactory;
+import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
-import  cc.mashroom.db.config.JDBCConfig;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
@@ -44,7 +43,7 @@ import  cc.mashroom.xcache.XMemTableCache;
 
 public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 {
-	private  XClusterNode  localNode = new  XClusterNode( 0, UUID.randomUUID() , "0.0.0.0" , new  HashMap<String,Object>() );
+	private  XClusterNode  localNode = new  XClusterNode( 0,UUID.randomUUID(),"0.0.0.0",new  HashMap<String,Object>() );
 	
 	private  Sigar  sigar = new  Sigar();
 	
@@ -83,13 +82,16 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	public  void  initialize(       Object  ...  parameters )  throws  Exception
 	{
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.h2.Driver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1") );
+		if( ConnectionManager.INSTANCE.addDataSource("org.h2.Driver","xcache-memtable-datasource","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1",null,null,2,4,null,"SELECT  2") )
+		{
+			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  error  while  adding  memtable  data  source" );
+		}
 		
 		try( InputStream  input = getClass().getResourceAsStream(System.getProperty("xcache.memtable.ddl.location","/memory-policy.ddl")) )
 		{
-			if( input   != null )
+			if( input  !=  null )
 			{
-				try(Connection  connection = ConnectionFactory.getConnection("xcache-memtable-datasource") )
+				try(   Connection  connection = ConnectionManager.INSTANCE.getConnection("xcache-memtable-datasource") )
 				{
 					connection.runScripts( IOUtils.toString( input, "UTF-8" ) );
 				}
@@ -101,7 +103,7 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	public  void  stop()
 	{
-		ConnectionFactory.stop();
+		ConnectionManager.INSTANCE.release(/**/);
 	}
 	
 	public  List<XClusterNode>  getClusterNodes()

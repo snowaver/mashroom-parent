@@ -38,8 +38,8 @@ import  com.fasterxml.jackson.core.type.TypeReference;
 
 import  cc.mashroom.db.ConnectionFactory;
 import  cc.mashroom.db.common.Db;
-import  cc.mashroom.db.config.JDBCConfig;
 import  cc.mashroom.db.connection.Connection;
+import cc.mashroom.db.util.DataSourceUtils;
 import  cc.mashroom.plugin.Plugin;
 import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.StringUtils;
@@ -146,7 +146,7 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	
 	protected  boolean  runScript( String  sqlScript , String  dataSourceName , InetSocketAddress  address )
 	{
-		JDBCConfig.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/") );
+		DataSourceUtils.addDataSource( new  HashMap<String,Object>().addEntry("jdbc.xcache-memtable-datasource.driverClass","org.apache.ignite.IgniteJdbcThinDriver").addEntry("jdbc.xcache-memtable-datasource.jdbcUrl","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/") );
 		
 		try(Connection  connection= ConnectionFactory.getConnection("xcache-memtable-datasource") )
 		{

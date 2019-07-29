@@ -21,7 +21,7 @@ public  interface  XMemTableCache<K,V>  extends  XCacheStrategy<K,V>
 {
 	public  boolean  update( String  sql,Object...  params );
 	
-	public  List<V>  lookup( String  sql,Object...  params );
+	public  <T>  T  lookupOne( Class<T>  resultBeanClazz,String  sql,Object...  params );
 	
-	public  V  lookupOne( String  sql,Object...  params );
+	public  <T>  List<T>  lookup( Class<T>  resultBeanClazz,String  sql,Object...  params );
 }

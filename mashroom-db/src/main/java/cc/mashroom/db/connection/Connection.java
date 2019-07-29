@@ -23,7 +23,6 @@ import  com.google.common.collect.Lists;
 
 import  cc.mashroom.db.ConnectionThreadReference;
 import  cc.mashroom.db.util.ConnectionUtils;
-import  cc.mashroom.util.IOUtils;
 import  cc.mashroom.util.stream.Consumer;
 import  cc.mashroom.util.stream.Stream;
 import  lombok.AccessLevel;
@@ -33,7 +32,7 @@ import  lombok.experimental.Accessors;
 
 @AllArgsConstructor
 
-public  class  Connection   implements  AutoCloseable
+public  class     Connection  implements  AutoCloseable
 {
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )
@@ -41,18 +40,15 @@ public  class  Connection   implements  AutoCloseable
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )
 	protected  java.sql.Connection   connection;
-	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain=true )
-	protected  String  dataSourceName;
 	
-	public  Connection  setAutoCommit(   boolean  autoCommit )  throws  SQLException
+	public  Connection  setAutoCommit( boolean    autoCommit )  throws  SQLException
 	{
-		connection.setAutoCommit(  autoCommit );
+		this.connection.setAutoCommit(    autoCommit );
 		
 		return  this;
 	}
 	
-	public  Connection  setTransactionIsolation( int  transactionIsolationLevel )  throws  SQLException
+	public  Connection  setTransactionIsolation(    int  transactionIsolationLevel )  throws  SQLException
 	{
 		connection.setTransactionIsolation( transactionIsolationLevel );
 		
@@ -61,46 +57,46 @@ public  class  Connection   implements  AutoCloseable
 	
 	public  PreparedStatement  prepareStatement( boolean  returnGeneratedKeys,String  sql,Object...   params )  throws  SQLException
 	{
-		return  ConnectionUtils.prepare( returnGeneratedKeys ? connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql),params );
+		return  ConnectionUtils.prepare( returnGeneratedKeys ? this.connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS) : this.connection.prepareStatement(sql),params );
 	}
 	
 	public  PreparedStatement  prepareStatement( String  sql )  throws  SQLException
 	{
-		return  connection.prepareStatement(   sql );
-	}
-	
-	public  PreparedStatement  prepareStatement( String  sql,Object...   params )  throws  SQLException
-	{
-		return  prepareStatement( false,sql,params );
-	}
-			
-	public  void  commit()  throws  SQLException
-	{
-		connection.commit(  );
-	}
-	
-	public  PreparedStatement  prepareStatement( String  sql,Object[][]  params )  throws  SQLException
-	{
-		return  prepareStatement( false,sql,params );
-	}
-
-	public  void  rollback()throws  SQLException
-	{
-		connection.rollback();
-	}
-	
-	public  PreparedStatement  prepareStatement( boolean  returnGeneratedKeys,String  sql,Object[][]  params )  throws  SQLException
-	{
-		return  ConnectionUtils.prepare( returnGeneratedKeys ? connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql),params );
+		return  this.connection.prepareStatement(sql );
 	}
 	
 	public  void  close()
 	{
-		IOUtils.closeQuietly( ConnectionThreadReference.get(dataSourceName) != null?null: connection );
+		if( ConnectionThreadReference.get(this.connectionPool.getDataSourceName()) == null )    connectionPool.returnObject( this );
 	}
 	
-	public  void  runScripts( String  sqlScripts )  throws  SQLException
+	public  PreparedStatement  prepareStatement( String  sql,   Object...   params )  throws  SQLException
 	{
-		Stream.forEach( Lists.newArrayList(sqlScripts.split("(;\\s*\\r\\n)|(;\\s*\\n)")),new  Consumer<String>(){public  void  consume(String  sqlScript)  throws  Exception{ prepareStatement(sqlScript).executeUpdate(); }} );
+		return  prepareStatement(   false,sql,params );
+	}
+			
+	public  void  commit()  throws  SQLException
+	{
+		this.connection.commit(  );
+	}
+	
+	public  PreparedStatement  prepareStatement( boolean  returnGeneratedKeys,String  sql,Object[][]  params )  throws  SQLException
+	{
+		return  ConnectionUtils.prepare( returnGeneratedKeys ? this.connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS) : this.connection.prepareStatement(sql),params );
+	}
+	
+	public  PreparedStatement  prepareStatement( String  sql,   Object[][]  params )  throws  SQLException
+	{
+		return  prepareStatement(   false,sql,params );
+	}
+
+	public  void  rollback()throws  SQLException
+	{
+		this.connection.rollback();
+	}
+	
+	public  void  runScripts(  String  scripts )    throws  SQLException
+	{
+		Stream.forEach( Lists.newArrayList(scripts.split("(;\\s*\\r\\n)|(;\\s*\\n)")),new  Consumer<String>(){public  void  consume(String  sqlScript)  throws  Exception{ prepareStatement(sqlScript).executeUpdate(); }} );
 	}
 }

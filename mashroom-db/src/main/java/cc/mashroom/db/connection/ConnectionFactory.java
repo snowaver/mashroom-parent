@@ -56,7 +56,7 @@ public  class  ConnectionFactory  extends  BasePooledObjectFactory<Connection>
 	
 	public  Connection  create()    throws  Exception
 	{
-		return  new  Connection( this.connectionPool,DriverManager.getConnection(this.properties.getProperty("jdbcUrl"),this.properties),this.dataSourceName );
+		return  new  Connection( this.connectionPool,DriverManager.getConnection(this.properties.getProperty("jdbcUrl"),this.properties) );
 	}
 	
 	public  boolean  validateObject(  PooledObject<Connection>  pooledObject )

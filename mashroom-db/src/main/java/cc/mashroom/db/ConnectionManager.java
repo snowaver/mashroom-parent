@@ -19,10 +19,11 @@ import  java.util.Map.Entry;
 
 import  javax.annotation.Nonnull;
 
-import  cc.mashroom.db.config.JDBCConfig;
+import  cc.mashroom.config.Config;
+import  cc.mashroom.config.Properties;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.db.connection.ConnectionPool;
-import  cc.mashroom.util.StringUtils;
+import  cc.mashroom.db.util.DataSourceUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  lombok.AccessLevel;
@@ -35,12 +36,14 @@ import  lombok.experimental.Accessors;
 
 public  class  ConnectionManager
 {
-	private  Map<String,ConnectionPool>  connectionPools    = new  ConcurrentHashMap<String,ConnectionPool>();
+	private  Map<String,ConnectionPool>   connectionPools  = new  ConcurrentHashMap<String, ConnectionPool>();
 	@Accessors(   chain = true )
 	@Setter
 	@Getter
 	private  DataSourceLocator dataSourceLocator;
 	
+	private  Map<String,Properties>  dataSourceProperties  = new  ConcurrentHashMap<String,     Properties>();
+
 	public  void  release()
 	{
 		for( Entry<String,ConnectionPool>  entry:    connectionPools.entrySet() )
@@ -52,16 +55,32 @@ public  class  ConnectionManager
 	}
 	
 	public  final  static  ConnectionManager  INSTANCE= new  ConnectionManager();
+	
+	public  boolean  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
+	{
+		if( this.dataSourceProperties.containsKey(    dataSourceName) )
+		{
+			throw  new  IllegalStateException( String.format("MASHROOM-DB:  ** JDBC  CONFIG **  data  source  ( %s )  exists.",dataSourceName) );
+		}
+		
+		this.dataSourceProperties.put( dataSourceName,DataSourceUtils.createDataSourceProperties(driverClassName,dataSourceName,jdbcUrl,user,password,minPoolSize,maxPoolSize,idleConnectionTestPeriod,preferredTestQuery) );
+		
+		try
+		{
+			this.getConnection(dataSourceName).close();   return  true;
+		}
+		catch(    Exception  e )
+		{
+			e.printStackTrace();   dataSourceProperties.remove( dataSourceName );
+		}
+		
+		return  false;
+	}
 	/**
 	 *  use  the  connection  in  connection  thread  reference  or  create  a  new  one  if  no  connection  held  by  connection  thread  reference.  the  connection  will  be  held  by  connection  thread  reference  if  autoCloseable  is  false.
 	 */
 	public  Connection  getConnection(@Nonnull  String  dataSourceName,boolean  autoClose )  throws  Exception
 	{
-		if( StringUtils.isBlank(dataSourceName) )
-		{
-			throw  new  IllegalArgumentException( "MASHROOM-DB:  ** CONNECTION  FACTORY **  data  source  name  should  not  be  blank." );
-		}
-		
 		Connection  connection = ConnectionThreadReference.get( dataSourceName );
 
 		if( connection == null )
@@ -81,19 +100,24 @@ public  class  ConnectionManager
 	{
 		return  getConnection( dataSourceName , true );
 	}
-	
+		
 	public  void  initialize(  Object...  parameters )throws  Exception
 	{
-		for( String  dataSourceName : JDBCConfig.getDataSourceNames() )
+		for( Entry<Object,Object>  entry : Config.use(parameters == null || parameters.length == 0 ? "jdbc.properties" : (String)  parameters[0]).entrySet() )
+		{
+			this.dataSourceProperties.computeIfLackof(String.valueOf(entry.getKey()).split("\\.")[1],new  Map.Computer<String,Properties>(){public  Properties  compute(String  key)  throws  Exception{ return  new  Properties(); }}).put( String.valueOf(entry.getKey()).split("\\.")[2],entry.getValue() );
+		}
+		
+		for( String  dataSourceName :   dataSourceProperties.keySet() )
 		{
 			this.getConnection(dataSourceName).close();
 		}
 	}
 	/**
-	 *  get  the  connection  pool  or  create  a  new  one  by  dataSourceName  if  absent
+	 *  get  the  connection  pool  or  create  a  new  one  by  data  source  name  and  properties  if  absent.
 	 */
 	public  ConnectionPool  getConnectionPool(  @Nonnull    final  String  dataSourceName )
 	{
-		return  connectionPools.computeIfLackof( dataSourceName,new  Map.Computer<String,ConnectionPool>(){public  ConnectionPool  compute(String  key)  throws  Exception{ return  DataSourceBuilder.build(dataSourceName); }} );
+		return  connectionPools.computeIfLackof( dataSourceName,new  Map.Computer<String,ConnectionPool>(){public  ConnectionPool  compute(String  key)  throws  Exception{ return  DataSourceBuilder.build(dataSourceName,dataSourceProperties.get(dataSourceName)); }} );
 	}
 }

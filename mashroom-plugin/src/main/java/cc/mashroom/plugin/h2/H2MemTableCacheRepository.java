@@ -17,11 +17,10 @@ package cc.mashroom.plugin.h2;
 
 import  cc.mashroom.db.GenericRepository;
 import  cc.mashroom.db.annotation.DataSourceBind;
-import  cc.mashroom.util.collection.map.HashMap;
 
 @DataSourceBind( name="xcache-memtable-datasource",table="*" )
 
-public  class  H2MemTableCacheRepository  extends  GenericRepository<HashMap<String,Object>>
+public  class  H2MemTableCacheRepository  extends  GenericRepository
 {
 	
 }
