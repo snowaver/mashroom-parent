@@ -33,6 +33,10 @@ public  class  ReflectionUtils
 		
 		for( Class<?>  clazz : clazzes )
 		{
+			if( clazz == null )
+			{
+				continue;
+			}
 			for(Field  field : clazz.getDeclaredFields() )
 			{
 				if(field.isAnnotationPresent(annotation) )
@@ -42,7 +46,7 @@ public  class  ReflectionUtils
 			}
 			getAnnotatedFields( fields,annotation,clazz.getSuperclass() );
 			
-			getAnnotatedFields( fields,annotation,clazz.getSuperclass() );
+			getAnnotatedFields( fields,annotation,clazz.getInterfaces() );
 		}
 		
 		return  fields;
