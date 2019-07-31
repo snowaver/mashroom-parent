@@ -82,9 +82,13 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	public  void  initialize(       Object  ...  parameters )  throws  Exception
 	{
-		if( ConnectionManager.INSTANCE.addDataSource("org.h2.Driver","xcache-memtable-datasource","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1",null,null,2,4,null,"SELECT  2") )
+		try
 		{
-			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  error  while  adding  memtable  data  source" );
+			ConnectionManager.INSTANCE.addDataSource("org.h2.Driver","xcache-memtable-datasource","jdbc:h2:mem:squirrel;DB_CLOSE_DELAY=-1",null,null,2,4,null,"SELECT  2" );
+		}
+		catch(  Exception  asex )
+		{
+			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  error  while  adding  a  new  memtable  data  source  ( %s )","xcache-memtable-datasource"),asex );
 		}
 		
 		try( InputStream  input = getClass().getResourceAsStream(System.getProperty("xcache.memtable.ddl.location","/memory-policy.ddl")) )

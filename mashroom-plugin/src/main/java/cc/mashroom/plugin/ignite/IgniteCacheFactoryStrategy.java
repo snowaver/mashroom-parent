@@ -145,12 +145,16 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 	
 	protected  boolean  runScript( String  sqlScript , String  dataSourceName , InetSocketAddress  address )
 	{
-		if( ConnectionManager.INSTANCE.addDataSource("org.apache.ignite.IgniteJdbcThinDriver","xcache-memtable-datasource","jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/",null,null,2,4,null,"SELECT  2") )
+		try
 		{
-			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  error  while  adding  memtable  data  source" );
+			ConnectionManager.INSTANCE.addDataSource( "org.apache.ignite.IgniteJdbcThinDriver",dataSourceName,"jdbc:ignite:thin://"+address.getAddress().getHostAddress()+"/",null,null,2,4,null,"SELECT  2" );
+		}
+		catch(    Exception  asex )
+		{
+			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** IGNITE  CACHE  FACTORY  STRATEGY **  error  while  adding  a  new  memtable  data  source  ( %s )",dataSourceName),  asex );
 		}
 		
-		try(Connection  connection= ConnectionManager.INSTANCE.getConnection("xcache-memtable-datasource") )
+		try(Connection  connection=      ConnectionManager.INSTANCE.getConnection(dataSourceName) )
 		{
 			connection.runScripts(  sqlScript );      return  true;
 		}
