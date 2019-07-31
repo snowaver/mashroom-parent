@@ -41,7 +41,7 @@ public  class  RecordUtils
 		
 		while( resultSet.next() )
 		{
-			result.add( (T)  fillColumns(clazz,java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
+			result.add( (T)  fillColumns(clazz,clazz.getPackage().getName().startsWith("java.") || java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
 		}
 		
 		return  result;

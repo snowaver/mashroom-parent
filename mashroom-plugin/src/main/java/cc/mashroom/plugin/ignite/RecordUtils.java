@@ -39,7 +39,7 @@ public  class  RecordUtils
 		
 		for( List<Object>  values : cursor.getAll() )
 		{
-			result.add( (T)  fillColumns(clazz,java.util.Map.class.isAssignableFrom(clazz) ?null : cc.mashroom.db.util.RecordUtils.createColumnBeanFieldMapper(clazz),cursor,values) );
+			result.add( (T)  fillColumns(clazz, clazz.getPackage().getName().startsWith("java.") || java.util.Map.class.isAssignableFrom(clazz) ?null : cc.mashroom.db.util.RecordUtils.createColumnBeanFieldMapper(clazz),cursor,values) );
 		}
 		
 		return  result;
