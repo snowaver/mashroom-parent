@@ -41,7 +41,7 @@ public  class  RecordUtils
 		
 		while( resultSet.next() )
 		{
-			result.add( (T)  fillColumns(java.util.Map.class.isAssignableFrom(clazz) ? new  HashMap<String,Object>() : clazz.newInstance(),java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
+			result.add( (T)  fillColumns(clazz,java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
 		}
 		
 		return  result;
@@ -55,9 +55,9 @@ public  class  RecordUtils
 		{
 			columnBeanFieldMapper     = COLUMN_BEAN_FIELD_MAPPER_CACHE.get( clazz );
 			
-			if( columnBeanFieldMapper ==   null )
+			if( columnBeanFieldMapper ==  null  )
 			{
-				columnBeanFieldMapper = new  HashMap<String,Field>();
+				columnBeanFieldMapper =   new  HashMap<String,Field>();
 				
 				for(     Field  field : ReflectionUtils.getAnnotatedFields(clazz,Column.class) )
 				{
@@ -71,13 +71,20 @@ public  class  RecordUtils
 		return     columnBeanFieldMapper;
 	}
 	
-	public  static  <T>  T  fillColumns( final  T  record,Map<String,Field>  columnBeanFieldMapper,ResultSetMetaData  metadata,ResultSet  rs )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	public  static  <T>  T  fillColumns( Class<T>  resultBeanClazz,Map<String,Field>  columnBeanFieldMapper,ResultSetMetaData  metadata,ResultSet  rs )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException,InvocationTargetException,InstantiationException
 	{
-		for( int  i = 1;i <= metadata.getColumnCount()-1;i  = i + 1 )
+		if( metadata.getColumnCount()== 1      &&rs.getObject(1).getClass() == resultBeanClazz )
+		{
+			return  (T)  rs.getObject(1);
+		}
+		
+		T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
+		
+		for( int  i = 1;i <= metadata.getColumnCount()-1;   i = i + 1 )
 		{
 			if( record instanceof java.util.Map )
 			{
-				ObjectUtils.cast(record,Map.class).put( metadata.getColumnLabel(i),FieldsConverter.convert(metadata.getColumnTypeName(i),rs.getObject(i)) );
+				ObjectUtils.cast(record,java.util.Map.class).put( metadata.getColumnLabel(i),rs.getObject(i) );
 			}
 			else
 			{

@@ -24,9 +24,7 @@ import  java.util.List;
 
 import  org.apache.ignite.cache.query.FieldsQueryCursor;
 
-import  cc.mashroom.db.annotation.Column;
 import  cc.mashroom.util.ObjectUtils;
-import  cc.mashroom.util.ReflectionUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
@@ -41,38 +39,21 @@ public  class  RecordUtils
 		
 		for( List<Object>  values : cursor.getAll() )
 		{
-			result.add( (T)  fillColumns(java.util.Map.class.isAssignableFrom(clazz) ? new  HashMap<String,Object>() : clazz.newInstance(),java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),cursor,values) );
+			result.add( (T)  fillColumns(clazz,java.util.Map.class.isAssignableFrom(clazz) ?null : cc.mashroom.db.util.RecordUtils.createColumnBeanFieldMapper(clazz),cursor,values) );
 		}
 		
 		return  result;
 	}
 	
-	public  static  Map<String,Field>  createColumnBeanFieldMapper(Class<?>  clazz )
+	public  static  <T>  T  fillColumns( Class<T>  resultBeanClazz,Map<String,Field>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException,IllegalArgumentException,InvocationTargetException,InstantiationException
 	{
-		Map<String,Field>   columnBeanFieldMapper = COLUMN_BEAN_FIELD_MAPPER_CACHE.get( clazz );
-		
-		synchronized(     clazz )
+		if( cursor.getColumnsCount() == 1      &&  values.get(0).getClass() == resultBeanClazz )
 		{
-			columnBeanFieldMapper     = COLUMN_BEAN_FIELD_MAPPER_CACHE.get( clazz );
-			
-			if( columnBeanFieldMapper ==   null )
-			{
-				columnBeanFieldMapper = new  HashMap<String,Field>();
-				
-				for(     Field  field : ReflectionUtils.getAnnotatedFields(clazz,Column.class) )
-				{
-					columnBeanFieldMapper.put( field.getAnnotation(Column.class).name(),field );
-				}
-				
-				COLUMN_BEAN_FIELD_MAPPER_CACHE.put(   clazz,columnBeanFieldMapper );
-			}
+			return  (T)  values.get( 0 );
 		}
 		
-		return     columnBeanFieldMapper;
-	}
-	
-	public  static  <T>  T  fillColumns( final  T  record,Map<String,Field>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
-	{
+		T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
+		
 		for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+1 )
 		{
 			if( record instanceof java.util.Map )
@@ -81,7 +62,7 @@ public  class  RecordUtils
 			}
 			else
 			{
-				Field  fd =  columnBeanFieldMapper.get( cursor.getFieldName(i )   );
+				Field  fd =  columnBeanFieldMapper.get( cursor.getFieldName(i ) );
 				
 				fd.setAccessible( true );
 				
