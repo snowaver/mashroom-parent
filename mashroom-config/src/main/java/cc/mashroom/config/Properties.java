@@ -15,6 +15,7 @@
  */
 package cc.mashroom.config;
 
+import org.apache.commons.lang3.StringUtils;
 import  org.slf4j.LoggerFactory;
 
 public  class  Properties  extends  java.util.Properties
@@ -28,9 +29,10 @@ public  class  Properties  extends  java.util.Properties
 	
 	public  int  getInt( String  key,int  defaultValue )
 	{
+		String  originalValue= super.getProperty( key );
 		try
 		{
-			return  super.containsKey( key ) ? Integer.parseInt( getProperty(key) ) : defaultValue;
+			return  StringUtils.isBlank( originalValue ) ? defaultValue : Integer.parseInt(     originalValue );
 		}
 		catch( Exception  e )
 		{
@@ -42,9 +44,10 @@ public  class  Properties  extends  java.util.Properties
 	
 	public  boolean  getBoolean( String  key,boolean  defaultValue )
 	{
+		String  originalValue= super.getProperty( key );
 		try
 		{
-			return  super.containsKey(key) ? Boolean.parseBoolean(getProperty(key)) : defaultValue;
+			return  StringUtils.isBlank( originalValue ) ? defaultValue : Boolean.parseBoolean( originalValue );
 		}
 		catch( Exception  e )
 		{

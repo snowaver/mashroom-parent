@@ -23,35 +23,35 @@ public  class  DataSourceUtils
 {
 	public  static  Properties  createDataSourceProperties( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
 	{
-		Properties  properties  = new  Properties();
+		Properties  properties = new  Properties();
 		
-		properties.put( "jdbc."+dataSourceName+".driverClass",driverClassName );
+		properties.put( "driverClass",driverClassName );
 		
-		properties.put( "jdbc."+dataSourceName+".jdbcUrl",jdbcUrl );
+		properties.put( "jdbcUrl",  jdbcUrl );
 		
 		if( user != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".user",  user );
+			properties.put( "user",    user );
 		}
 		if( password != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".password",      password );
+			properties.put( "password", password );
 		}
 		if( minPoolSize != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".minPoolSize",minPoolSize );
+			properties.put( "minPoolSize",minPoolSize );
 		}
 		if( preferredTestQuery != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".preferredTestQuery",preferredTestQuery );
+			properties.put( "preferredTestQuery",preferredTestQuery );
 		}
 		if( maxPoolSize != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".maxPoolSize",maxPoolSize );
+			properties.put( "maxPoolSize",maxPoolSize );
 		}
 		if( idleConnectionTestPeriod != null )
 		{
-			properties.put( "jdbc."+dataSourceName+".idleConnectionTestPeriod" ,  idleConnectionTestPeriod );
+			properties.put( "idleConnectionTestPeriod" , idleConnectionTestPeriod );
 		}
 		
 		return        properties;
