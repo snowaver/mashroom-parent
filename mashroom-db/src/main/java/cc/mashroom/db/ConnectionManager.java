@@ -56,7 +56,7 @@ public  class  ConnectionManager
 	
 	public  final  static  ConnectionManager  INSTANCE= new  ConnectionManager();
 	
-	public  boolean  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
+	public  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )  throws  Exception
 	{
 		if( this.dataSourceProperties.containsKey(    dataSourceName) )
 		{
@@ -67,14 +67,12 @@ public  class  ConnectionManager
 		
 		try
 		{
-			this.getConnection(dataSourceName).close();   return  true;
+			this.getConnection(dataSourceName).close();  // return  Boolean.TRUE;
 		}
 		catch(    Exception  e )
 		{
-			e.printStackTrace();   dataSourceProperties.remove( dataSourceName );
+			e.printStackTrace();   dataSourceProperties.remove( dataSourceName );  throw e;
 		}
-		
-		return  false;
 	}
 	/**
 	 *  use  the  connection  in  connection  thread  reference  or  create  a  new  one  if  no  connection  held  by  connection  thread  reference.  the  connection  will  be  held  by  connection  thread  reference  if  autoCloseable  is  false.
