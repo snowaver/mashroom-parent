@@ -17,7 +17,7 @@ package cc.mashroom.xcache;
 
 import  java.util.concurrent.locks.Lock;
 
-public  interface  XCacheStrategy<K,V>
+public  interface  XCacheStrategy<K>
 {
-	public  Lock  getLock(   K  key );
+	public  Lock  getLock( K  key );
 }

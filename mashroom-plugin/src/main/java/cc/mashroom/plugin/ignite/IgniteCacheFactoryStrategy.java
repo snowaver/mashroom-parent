@@ -167,7 +167,7 @@ public  class  IgniteCacheFactoryStrategy   implements  CacheFactoryStrategy , P
 		return  new  IgniteKeyValueCache( this.ignite.getOrCreateCache(name) );
 	}
 	
-	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache(      String  name )
+	public  XMemTableCache  getOrCreateMemTableCache(String  name )
 	{
 		return  new  IgniteMemTableCache( this.ignite.getOrCreateCache(name) );
 	}

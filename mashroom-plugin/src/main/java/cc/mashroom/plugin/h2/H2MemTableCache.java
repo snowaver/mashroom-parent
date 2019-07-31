@@ -24,12 +24,13 @@ import  lombok.Setter;
 
 @NoArgsConstructor
 
-public  class  H2MemTableCache<K,V>  extends  AbstractH2Cache<K,V>  implements  XMemTableCache<K,V>
+public  class  H2MemTableCache      extends  AbstractH2Cache     implements  XMemTableCache
 {
 	public  H2MemTableCache(  String  name,H2MemTableCacheRepository  repository )
 	{
 		this.name  = name;
 	}
+	
 	@Setter
 	private  String  name;
 	@Setter
@@ -39,17 +40,17 @@ public  class  H2MemTableCache<K,V>  extends  AbstractH2Cache<K,V>  implements  
 	{
 		List<T>  rcs = lookup( resultBeanClazz,sql,params );
 		
-		if( rcs.size() >= 2 )
+		if( rcs.size()  >= 2 )
 		{
 			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** H2  MEM  TABLE  CACHE **  unique  constrains,  but  found  %d",rcs.size()) );
 		}
 		
-		return  rcs.isEmpty()  ? null : rcs.get(0);
+		return   rcs.isEmpty()  ? null: rcs.get(0);
 	}
 	
 	public  boolean  update( String  sql,Object...  params )
 	{
-		return  repository.update(sql,params) >= 0;
+		return   repository.update(sql,params)>= 0;
 	}
 	
 	public  <T>  List<T>  lookup( Class<T>  resultBeanClazz,String  sql,Object...  params )

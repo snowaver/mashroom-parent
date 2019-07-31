@@ -25,19 +25,19 @@ import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.Setter;
 import  lombok.SneakyThrows;
 
-public  class  IgniteMemTableCache<K,V>  implements  XMemTableCache<K,V>
+public  class  IgniteMemTableCache  implements  XMemTableCache
 {
 	@Setter
 	private  org.apache.ignite.IgniteCache     xcache;
 	/*
 	private  final  org.slf4j.Logger  logger= LoggerFactory.getLogger( IgniteCache.class );
 	*/
-	public  IgniteMemTableCache(  org.apache.ignite.IgniteCache<K,V>   xcache )
+	public  IgniteMemTableCache( org.apache.ignite.IgniteCache  xcache )
 	{
 		this.xcache= xcache;
 	}
 	
-	public  Lock  getLock( K  key )
+	public  Lock  getLock( Object  key )
 	{
 		return  this.xcache.lock( key );
 	}

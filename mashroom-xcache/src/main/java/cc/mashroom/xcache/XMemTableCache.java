@@ -17,7 +17,7 @@ package cc.mashroom.xcache;
 
 import  java.util.List;
 
-public  interface  XMemTableCache<K,V>  extends  XCacheStrategy<K,V>
+public  interface  XMemTableCache  extends  XCacheStrategy<Object>
 {
 	public  boolean  update( String  sql,Object...  params );
 	

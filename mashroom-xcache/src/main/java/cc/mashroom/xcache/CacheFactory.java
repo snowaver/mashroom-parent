@@ -43,7 +43,7 @@ public  class  CacheFactory
 		return  strategy.getOrCreateKeyValueCache(name );
 	}
 	
-	public  static  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache( String  name )
+	public  static  XMemTableCache              getOrCreateMemTableCache( String  name )
 	{
 		return  strategy.getOrCreateMemTableCache(name );
 	}

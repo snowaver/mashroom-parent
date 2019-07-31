@@ -15,7 +15,7 @@
  */
 package cc.mashroom.xcache;
 
-public  interface  XKeyValueCache<K,V>  extends  XCacheStrategy<K,V>
+public  interface  XKeyValueCache<K,V>  extends  XCacheStrategy<K>
 {
 	public  V  get( K  key  );
 	

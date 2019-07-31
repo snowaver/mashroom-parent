@@ -20,21 +20,20 @@ import  java.util.concurrent.locks.ReentrantLock;
 
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.Map;
-import  cc.mashroom.xcache.XCacheStrategy;
 import  lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 
-public  class  AbstractH2Cache<K, V>  implements  XCacheStrategy<K,V>
+public  class  AbstractH2Cache  //  implements  XCacheStrategy
 {
 	protected  static  final  Map<Object,ReentrantLock>  LOCKERS = new  ConcurrentHashMap<Object,ReentrantLock>();
 	
-	public  Lock  getLock(  K  key )
+	public  Lock  getLock( Object  key )
 	{
 		if( LOCKERS.containsKey(key) && !LOCKERS.get(key).isHeldByCurrentThread() )
 		{
-			return   null;
+			return  null;
 		}
-		return  LOCKERS.computeIfLackof( key,new  Map.Computer<Object, ReentrantLock>(){public  ReentrantLock  compute(Object  key)  throws  Exception{return  new  ReentrantLock();}} );
+		return  LOCKERS.computeIfLackof( key,new  Map.Computer<Object,ReentrantLock>(){public  ReentrantLock  compute(Object  key)  throws  Exception{return  new  ReentrantLock();}} );
 	}
 }

@@ -47,7 +47,7 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	private  Sigar  sigar = new  Sigar();
 	
-	public  String  getLocalNodeId()
+	public   String      getLocalNodeId()
 	{
 		return this.localNode.getId().toString();
 	}
@@ -75,9 +75,9 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		return  keyValueCaches.computeIfLackof(name,new  Map.Computer<String,H2KeyValueCache>(){public  H2KeyValueCache  compute(String  key)  throws  Exception{return  new  H2KeyValueCache<K,V>(key);}});
 	}
 	
-	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache( String  name )
+	public  XMemTableCache  getOrCreateMemTableCache( String  name )
 	{
-		return  memTableCaches.computeIfLackof(name,new  Map.Computer<String,H2MemTableCache>(){public  H2MemTableCache  compute(String  key)  throws  Exception{return  new  H2MemTableCache<K,V>(key,cacheRepository);}});
+		return  memTableCaches.computeIfLackof(name,new  Map.Computer<String,H2MemTableCache>(){public  H2MemTableCache  compute(String  key)  throws  Exception{return  new  H2MemTableCache(key,cacheRepository);}});
 	}
 	
 	public  void  initialize(       Object  ...  parameters )  throws  Exception

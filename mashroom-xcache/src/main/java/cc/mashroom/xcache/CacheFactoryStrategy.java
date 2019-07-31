@@ -25,13 +25,13 @@ public  interface  CacheFactoryStrategy
 	
 	public  long  getNextSequence( String  name );
 	
-	public  <V>  V  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
+	public  <R>  R  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
 	
 	public  List<XClusterNode>  getClusterNodes();
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name );
 	
-	public  <K,V>  XMemTableCache<K,V>  getOrCreateMemTableCache( String  name );
+	public  XMemTableCache  getOrCreateMemTableCache( String  name );
 	
-	public  <V>  V  call( RemoteCallable  <V>  callable,List<String> clusterNodeIds );
+	public  <R>  R  call( RemoteCallable  <R>  callable,List<String> clusterNodeIds );
 }

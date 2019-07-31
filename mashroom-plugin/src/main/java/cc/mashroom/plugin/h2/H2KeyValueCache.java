@@ -23,19 +23,20 @@ import  lombok.Setter;
 
 @NoArgsConstructor
 
-public  class  H2KeyValueCache<K,V>  extends  AbstractH2Cache<K,V>  implements  XKeyValueCache<K,V>
+public  class  H2KeyValueCache<K,V>  extends  AbstractH2Cache  implements  XKeyValueCache<K,V>
 {
 	public  H2KeyValueCache(  String  name )
 	{
 		this.name  = name;
 	}
 	
-	private  Map<K,V>  cache   = new  ConcurrentHashMap<K,V>();
+	private  Map<K,V>  cache = new  ConcurrentHashMap<K,V>();
 	
 	public  V  get(K  key)
 	{
 		return  cache.get( key );
 	}
+	
 	@Setter
 	private  String  name;
 	
