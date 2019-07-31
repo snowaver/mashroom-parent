@@ -16,7 +16,6 @@
 package cc.mashroom.plugin.ignite;
 
 import  java.beans.IntrospectionException;
-import  java.beans.PropertyDescriptor;
 import  java.lang.reflect.Field;
 import  java.lang.reflect.InvocationTargetException;
 import  java.sql.SQLException;
@@ -31,13 +30,12 @@ import  cc.mashroom.util.ReflectionUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
-import  cc.mashroom.util.collection.map.Map.Computer;
 
 public  class  RecordUtils
 {
-	private final  static  Map<String,PropertyDescriptor>  PROPERTY_DESCRIPTOR_CACHE = new  ConcurrentHashMap<String,PropertyDescriptor>();
+	private final  static  Map<Class<?>,Map<String,Field>>  COLUMN_BEAN_FIELD_MAPPER_CACHE = new  ConcurrentHashMap<Class<?>,Map<String,Field>>();
 	
-	public  static  <T>  List<T>  list( FieldsQueryCursor<List<Object>>  cursor, Class<T>  clazz )      throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
+	public  static  <T>  List<T>  list(FieldsQueryCursor<List<Object>>  cursor,Class<T>  clazz )        throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
 	{
 		List<T>  result  =  new  LinkedList<T>();
 		
@@ -49,31 +47,45 @@ public  class  RecordUtils
 		return  result;
 	}
 	
-	public  static  Map<String,String>  createColumnBeanFieldMapper(Class<?> clazz )
+	public  static  Map<String,Field>  createColumnBeanFieldMapper(Class<?>  clazz )
 	{
-		Map<String,String>  columnBeanFieldMapper   = new  HashMap<String,String>();
+		Map<String,Field>   columnBeanFieldMapper = COLUMN_BEAN_FIELD_MAPPER_CACHE.get( clazz );
 		
-		for( Field  field : ReflectionUtils.getAnnotatedFields(clazz,Column.class) )
+		synchronized(     clazz )
 		{
-			columnBeanFieldMapper.put( field.getAnnotation(Column.class).name(),field.getName() );
+			columnBeanFieldMapper     = COLUMN_BEAN_FIELD_MAPPER_CACHE.get( clazz );
+			
+			if( columnBeanFieldMapper ==   null )
+			{
+				columnBeanFieldMapper = new  HashMap<String,Field>();
+				
+				for(     Field  field : ReflectionUtils.getAnnotatedFields(clazz,Column.class) )
+				{
+					columnBeanFieldMapper.put( field.getAnnotation(Column.class).name(),field );
+				}
+				
+				COLUMN_BEAN_FIELD_MAPPER_CACHE.put(   clazz,columnBeanFieldMapper );
+			}
 		}
 		
-		return  columnBeanFieldMapper;
+		return     columnBeanFieldMapper;
 	}
 	
-	public  static  <T>  T  fillColumns( final  T  record,Map<String,String>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	public  static  <T>  T  fillColumns( final  T  record,Map<String,Field>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+1 )
 		{
 			if( record instanceof java.util.Map )
 			{
-				ObjectUtils.cast(record,Map.class).put(    cursor.getFieldName(i),values.get(i) );
+				ObjectUtils.cast(record,Map.class).put( cursor.getFieldName(i ),values.get(i) );
 			}
 			else
 			{
-				String  fn = columnBeanFieldMapper.get(    cursor.getFieldName(i) );
+				Field  fd =  columnBeanFieldMapper.get( cursor.getFieldName(i )   );
 				
-				PROPERTY_DESCRIPTOR_CACHE.computeIfLackof(record.getClass().getName()+"."+fn,new  Computer<String,PropertyDescriptor>(){public PropertyDescriptor compute(String  key)  throws  Exception{return  new  PropertyDescriptor(key,record.getClass());}}).getWriteMethod().invoke( record,values.get(i) );
+				fd.setAccessible( true );
+				
+				fd.set( record , values.get(i) );
 			}
 		}
 		
