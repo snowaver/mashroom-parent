@@ -21,6 +21,7 @@ import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.NoArgsConstructor;
 import  lombok.Setter;
+import lombok.experimental.Accessors;
 
 @NoArgsConstructor
 
@@ -28,11 +29,13 @@ public  class  H2MemTableCache      extends  AbstractH2Cache     implements  XMe
 {
 	public  H2MemTableCache(  String  name,H2MemTableCacheRepository  repository )
 	{
-		this.name  = name;
+		setName(name).setRepository(  repository );
 	}
 	
+	@Accessors( chain = true )
 	@Setter
 	private  String  name;
+	@Accessors( chain = true )
 	@Setter
 	private  H2MemTableCacheRepository  repository;
 	
