@@ -81,7 +81,7 @@ public  class  ConnectionUtils
 	
 	public  static  java.sql.PreparedStatement  prepare( java.sql.PreparedStatement  statement,Object...   params )  throws  SQLException
 	{
-		for( int  i = 0;i <= params.length-1;i = i+1 )
+		for( int  i = 0;i  < params.length;i = i + 1 )
 		{
 			statement.setObject( i+1,params[i] );
 		}
