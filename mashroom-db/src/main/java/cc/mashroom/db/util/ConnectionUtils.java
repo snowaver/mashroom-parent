@@ -15,28 +15,15 @@
  */
 package cc.mashroom.db.util;
 
+import  java.lang.reflect.Field;
 import  java.sql.SQLException;
 import  java.util.LinkedList;
 import  java.util.List;
 
 import  cc.mashroom.util.collection.map.Map;
-import cc.mashroom.util.stream.Consumer;
-import cc.mashroom.util.stream.Stream;
 
 public  class  ConnectionUtils
-{
-	public  static  int  batchUpdatedCount(  int[]  updates )
-	{
-		int  count = 0;
-		
-		for( int  update : updates )
-		{
-			if( update >= 1 )  count = count + 1;
-		}
-		
-		return   count;
-	}
-	
+{	
 	public  static  List<Object[]>  prepare( List<? extends Map>  records,BatchPrediction  prediction )
 	{
 		List<Object[]>  params = new  LinkedList<Object[]>();
@@ -49,17 +36,44 @@ public  class  ConnectionUtils
 		return  params;
 	}
 	
-	public  static  List<Object[]>  prepare( List<? extends Map>  records,List<String>  fields )
+	public  static  int  batchUpdatedCount(  int[]  updates )
+	{
+		int  count = 0;
+		
+		for( int  update : updates )  if( update>= 1 )  count =count+1;
+		
+		return   count;
+	}
+	
+	public  static  List<Object[]>  prepare(        List<? extends Map>  records,List<String>  fields )
 	{
 		List<Object[]>  params = new  LinkedList<Object[]>();
 		
-		for(    final  Map<String,Object>  record : records )
+		for(    Map<String,Object>  record : records )
 		{
-			final  List<Object>  values = new  LinkedList<Object>();
+			Object[]  values  = new  Object[ fields.size() ];
 			
-			Stream.forEach( fields,new  Consumer<String>(){public  void  consume(String  field)  throws  Exception{ values.add(record.get(field)); }} );
+			for( int  i = 0,length = fields.size();i < length;i = i+1 )
+			{
+				values[i] = record.get(fields.get(i));
+			}
+		}
+		
+		return  params;
+	}
+	
+	public  static  List<Object[]>  prepare( List<?>  records,List<String>  fields,Map<String,Field>  columnBeanFieldMapper )  throws  IllegalArgumentException, IllegalAccessException
+	{
+		List<Object[]>  params = new  LinkedList<Object[]>();
+		
+		for(Object  record : records )
+		{
+			Object[]  values  = new  Object[ fields.size() ];
 			
-			params.add( values.toArray() );
+			for( int  i = 0,length = fields.size();i < length;i = i+1 )
+			{
+				values[i] = columnBeanFieldMapper.get(fields.get(i)).get( record );
+			}
 		}
 		
 		return  params;
@@ -77,9 +91,9 @@ public  class  ConnectionUtils
 		
 	public  static  java.sql.PreparedStatement  prepare( java.sql.PreparedStatement  statement,Object[][]  params )  throws  SQLException
 	{
-		for( int  i = 0;i <= params.length-1;i = i+1 )
+		for( int  i = 0;i  < params.length;i = i + 1 )
 		{
-			for( int  j = 0;j <= params[i].length-1;j = j+1 )
+			for( int  j = 0;j  < params[i].length;j = j + 1 )
 			{
 				statement.setObject(j+1,params[i][j]);
 			}
