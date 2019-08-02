@@ -59,11 +59,17 @@ public  class  ConnectionFactory  extends  BasePooledObjectFactory<Connection>
 		return  new  Connection( this.connectionPool,DriverManager.getConnection(this.properties.getProperty("jdbcUrl"),this.properties) );
 	}
 	
+	@Override
+	public  void  destroyObject(      PooledObject<Connection>  pooledObject )  throws  Exception
+	{
+		super.destroyObject( pooledObject );    pooledObject.getObject().getConnection().close();
+	}
+	
 	public  boolean  validateObject(  PooledObject<Connection>  pooledObject )
 	{
 		try
 		{
-			pooledObject.getObject().prepareStatement(this.properties.getProperty("preferredTestQuery","SELECT  2")).executeQuery();
+			pooledObject.getObject().prepareStatement(       this.properties.getProperty("preferredTestQuery","SELECT  2")).executeQuery();
 		}
 		catch( SQLException  sqlex )
 		{

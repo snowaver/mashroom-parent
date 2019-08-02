@@ -27,6 +27,7 @@ import  cc.mashroom.util.stream.Consumer;
 import  cc.mashroom.util.stream.Stream;
 import  lombok.AccessLevel;
 import  lombok.AllArgsConstructor;
+import lombok.Getter;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
@@ -37,6 +38,7 @@ public  class     Connection  implements  AutoCloseable
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )
 	protected  ConnectionPool    connectionPool;
+	@Getter( value= AccessLevel.PACKAGE   )
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain=true )
 	protected  java.sql.Connection   connection;
