@@ -44,7 +44,7 @@ public  class  ConnectionManager
 	
 	private  Map<String,Properties>  dataSourceProperties  = new  ConcurrentHashMap<String,     Properties>();
 
-	public  void  release()
+	public   void    stop()
 	{
 		for( Entry<String,ConnectionPool>  entry:    connectionPools.entrySet() )
 		{

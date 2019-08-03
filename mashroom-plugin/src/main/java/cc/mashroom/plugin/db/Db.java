@@ -25,7 +25,7 @@ public  class  Db  implements  Plugin
 	{
 		try
 		{
-			ConnectionManager.INSTANCE.initialize(  parameters );
+			ConnectionManager.INSTANCE.initialize( parameters );
 		}
 		catch(  Exception  e )
 		{
@@ -33,5 +33,5 @@ public  class  Db  implements  Plugin
 		}
 	}
 	
-	public  void  stop(){ ConnectionManager.INSTANCE.release(); }
+	public  void  stop()  { ConnectionManager.INSTANCE.stop(); }
 }

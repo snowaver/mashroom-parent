@@ -45,9 +45,9 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 {
 	private  XClusterNode  localNode = new  XClusterNode( 0,UUID.randomUUID(),"0.0.0.0",new  HashMap<String,Object>() );
 	
-	private  Sigar  sigar = new  Sigar();
+	private  Sigar  sigar  = new  Sigar();
 	
-	public   String      getLocalNodeId()
+	public   String       getLocalNodeId()
 	{
 		return this.localNode.getId().toString();
 	}
@@ -102,12 +102,12 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 			}
 		}
 		
-		CacheFactory.setStrategy( this );
+		CacheFactory.setStrategy(  this );
 	}
 	
 	public  void  stop()
 	{
-		ConnectionManager.INSTANCE.release(/**/);
+		ConnectionManager.INSTANCE.stop();
 	}
 	
 	public  List<XClusterNode>  getClusterNodes()
