@@ -33,6 +33,8 @@ public  class  DataSourceBuilder
 		
 		GenericObjectPoolConfig<Connection>  poolConfig = new  GenericObjectPoolConfig<Connection>();
 		
+		poolConfig.setJmxEnabled( false );
+		
 		poolConfig.setMinIdle( properties.getInt("minPoolSize",2) );
 		
 		poolConfig.setMaxIdle( properties.getInt("maxPoolSize",4) );
