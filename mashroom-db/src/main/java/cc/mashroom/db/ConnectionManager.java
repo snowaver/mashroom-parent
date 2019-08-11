@@ -19,6 +19,8 @@ import  java.util.Map.Entry;
 
 import  javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import  cc.mashroom.config.Config;
 import  cc.mashroom.config.Properties;
 import  cc.mashroom.db.connection.Connection;
@@ -60,6 +62,13 @@ public  class  ConnectionManager
 	{
 		if( this.dataSourceProperties.containsKey(    dataSourceName) )
 		{
+			Properties  properties  = dataSourceProperties.get( dataSourceName );
+			
+			if( driverClassName.equals(properties.get("driverClass")) && jdbcUrl.equals(properties.get("jdbcUrl")) && (StringUtils.isBlank(user) && StringUtils.isBlank((String)  properties.get("user")) || user != null && user.equals(properties.get("user"))) )
+			{
+				return;
+			}
+			
 			throw  new  IllegalStateException( String.format("MASHROOM-DB:  ** JDBC  CONFIG **  data  source  ( %s )  exists.",dataSourceName) );
 		}
 		
@@ -112,7 +121,7 @@ public  class  ConnectionManager
 		}
 	}
 	/**
-	 *  get  the  connection  pool  or  create  a  new  one  by  data  source  name  and  properties  if  absent.
+	 *  get  the  connection  pool  or  create  a  new  one  by  datasource  name  and  properties  if  absent
 	 */
 	public  ConnectionPool  getConnectionPool(  @Nonnull    final  String  dataSourceName )
 	{
