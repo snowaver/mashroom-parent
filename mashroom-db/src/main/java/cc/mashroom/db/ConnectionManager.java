@@ -56,6 +56,11 @@ public  class  ConnectionManager
 	
 	public  final  static  ConnectionManager  INSTANCE= new  ConnectionManager();
 	
+	public  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )  throws  Exception
+	{
+		addDataSource( driverClassName,dataSourceName,jdbcUrl,user,password,minPoolSize,maxPoolSize,idleConnectionTestPeriod,preferredTestQuery,false );
+	}
+	
 	public  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery,boolean  ignoreIfExists )  throws  Exception
 	{
 		if( dataSourceProperties.containsKey(dataSourceName) && !ignoreIfExists )
