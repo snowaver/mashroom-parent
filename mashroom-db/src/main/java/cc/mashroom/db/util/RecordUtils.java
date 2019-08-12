@@ -41,7 +41,7 @@ public  class  RecordUtils
 		
 		while( resultSet.next() )
 		{
-			result.add( (T)  fillColumns(clazz,clazz.getPackage().getName().startsWith("java.") || java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
+			result.add( (T)  fillColumns(clazz,clazz.getPackage().getName().startsWith("java." ) || java.util.Map.class.isAssignableFrom(clazz) ? null : createColumnBeanFieldMapper(clazz),resultSet.getMetaData(),resultSet) );
 		}
 		
 		return  result;
@@ -73,29 +73,39 @@ public  class  RecordUtils
 	
 	public  static  <T>  T  fillColumns( Class<T>  resultBeanClazz,Map<String,Field>  columnBeanFieldMapper,ResultSetMetaData  metadata,ResultSet  rs )  throws  SQLException,IntrospectionException,IllegalAccessException, IllegalArgumentException,InvocationTargetException,InstantiationException
 	{
-		if( metadata.getColumnCount()== 1      &&rs.getObject(1).getClass() == resultBeanClazz )
+		if( metadata.getColumnCount()== 1 && rs.getObject(1) != null &&rs.getObject(1).getClass() == resultBeanClazz )
 		{
 			return  (T)  rs.getObject(1);
 		}
 		
-		T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
-		
-		for( int  i = 1;i <= metadata.getColumnCount()-1;   i = i + 1 )
+		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper == null || columnBeanFieldMapper.isEmpty() )
 		{
-			if( record instanceof java.util.Map )
+			T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz ) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
+			
+			for( int  i = 1;i <= metadata.getColumnCount()- 1;i = i+1 )
 			{
-				ObjectUtils.cast(record,java.util.Map.class).put( metadata.getColumnLabel(i),rs.getObject(i) );
+				if( record instanceof java.util.Map )
+				{
+					ObjectUtils.cast(record,java.util.Map.class).put( metadata.getColumnLabel(i)  , rs.getObject(i) );
+				}
+				else
+				{
+					Field  columnField = columnBeanFieldMapper.get(metadata.getColumnLabel(i) );
+					
+					columnField.setAccessible(true );
+					
+					columnField.set( record,rs.getObject(i) );
+				}
 			}
-			else
-			{
-				Field  fd = columnBeanFieldMapper.get( metadata.getColumnLabel(i) );
-				
-				fd.setAccessible( true );
-				
-				fd.set( record,rs.getObject(i) );
-			}
+			
+			return  record;
+		}
+		else
+		if( metadata.getColumnCount() == 1 && rs.getObject(1) == null )
+		{
+			return    null;
 		}
 		
-		return  record;
+		return  null;
 	}
 }

@@ -47,29 +47,39 @@ public  class  RecordUtils
 	
 	public  static  <T>  T  fillColumns( Class<T>  resultBeanClazz,Map<String,Field>  columnBeanFieldMapper,FieldsQueryCursor<List<Object>>  cursor,List<Object>  values )  throws  SQLException,IntrospectionException,IllegalAccessException,IllegalArgumentException,InvocationTargetException,InstantiationException
 	{
-		if( cursor.getColumnsCount() == 1      &&  values.get(0).getClass() == resultBeanClazz )
+		if( cursor.getColumnsCount() == 1 && values.get(0) != null && values.get(0).getClass() == resultBeanClazz )
 		{
 			return  (T)  values.get( 0 );
 		}
 		
-		T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
-		
-		for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+1 )
+		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper == null || columnBeanFieldMapper.isEmpty() )
 		{
-			if( record instanceof java.util.Map )
+			T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
+			
+			for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+ 1 )
 			{
-				ObjectUtils.cast(record,Map.class).put( cursor.getFieldName(i ),values.get(i) );
+				if( record instanceof java.util.Map )
+				{
+					ObjectUtils.cast(record,Map.class).put( cursor.getFieldName(i ) , values.get( i ) );
+				}
+				else
+				{
+					Field  columnField =  columnBeanFieldMapper.get( cursor.getFieldName( i ) );
+					
+					columnField.setAccessible(true );
+					
+					columnField.set( record,values.get(i) );
+				}
 			}
-			else
-			{
-				Field  fd =  columnBeanFieldMapper.get( cursor.getFieldName(i ) );
-				
-				fd.setAccessible( true );
-				
-				fd.set( record , values.get(i) );
-			}
+			
+			return  record;
+		}
+		else
+		if( cursor.getColumnsCount() == 1 && values.get( 0 ) == null )
+		{
+			return    null;
 		}
 		
-		return  record;
+		return  null;
 	}
 }
