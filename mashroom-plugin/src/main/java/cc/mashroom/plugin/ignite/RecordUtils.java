@@ -31,7 +31,7 @@ import  cc.mashroom.util.collection.map.Map;
 
 public  class  RecordUtils
 {
-	private final  static  Map<Class<?>,Map<String,Field>>  COLUMN_BEAN_FIELD_MAPPER_CACHE = new  ConcurrentHashMap<Class<?>,Map<String,Field>>();
+	private final  static  Map<Class<?>,Map<String,Field>>  COLUMN_BEAN_FIELD_MAPPER_CACHE     = new  ConcurrentHashMap<Class<?>,Map<String,Field>>();
 	
 	public  static  <T>  List<T>  list(FieldsQueryCursor<List<Object>>  cursor,Class<T>  clazz )        throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
 	{
@@ -39,7 +39,7 @@ public  class  RecordUtils
 		
 		for( List<Object>  values : cursor.getAll() )
 		{
-			result.add( (T)  fillColumns(clazz, clazz.getPackage().getName().startsWith("java.") || java.util.Map.class.isAssignableFrom(clazz) ?null : cc.mashroom.db.util.RecordUtils.createColumnBeanFieldMapper(clazz),cursor,values) );
+			result.add( (T)  fillColumns(clazz, clazz.getPackage().getName().startsWith("java.") || java.util.Map.class.isAssignableFrom(clazz) ? null : cc.mashroom.db.util.RecordUtils.createColumnBeanFieldMapper(clazz),cursor,values) );
 		}
 		
 		return  result;
@@ -52,7 +52,7 @@ public  class  RecordUtils
 			return  (T)  values.get( 0 );
 		}
 		
-		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper == null || columnBeanFieldMapper.isEmpty() )
+		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper != null && !columnBeanFieldMapper.isEmpty() )
 		{
 			T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
 			

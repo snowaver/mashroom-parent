@@ -33,7 +33,7 @@ import  cc.mashroom.util.collection.map.Map;
 
 public  class  RecordUtils
 {
-	private final  static  Map<Class<?>,Map<String,Field>>  COLUMN_BEAN_FIELD_MAPPER_CACHE = new  ConcurrentHashMap<Class<?>,Map<String,Field>>();
+	private final  static  Map<Class<?>,Map<String,Field>>  COLUMN_BEAN_FIELD_MAPPER_CACHE    =  new  ConcurrentHashMap<Class<?>,Map<String,Field>>();
 	
 	public  static  <T>  List<T>  list(       ResultSet  resultSet,Class<T>  clazz )  throws  SQLException,InstantiationException,IllegalAccessException,IntrospectionException,IllegalArgumentException,InvocationTargetException
 	{
@@ -78,7 +78,7 @@ public  class  RecordUtils
 			return  (T)  rs.getObject(1);
 		}
 		
-		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper == null || columnBeanFieldMapper.isEmpty() )
+		if( java.util.Map.class.isAssignableFrom(resultBeanClazz) || columnBeanFieldMapper != null && !columnBeanFieldMapper.isEmpty() )
 		{
 			T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz ) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
 			
@@ -86,7 +86,7 @@ public  class  RecordUtils
 			{
 				if( record instanceof java.util.Map )
 				{
-					ObjectUtils.cast(record,java.util.Map.class).put( metadata.getColumnLabel(i)  , rs.getObject(i) );
+					ObjectUtils.cast(record,java.util.Map.class).put( metadata.getColumnLabel(i)   ,rs.getObject(i) );
 				}
 				else
 				{
