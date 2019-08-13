@@ -40,7 +40,7 @@ public  class  ConnectionUtils
 	{
 		int  count = 0;
 		
-		for( int  update : updates )  if( update>= 1 )  count =count+1;
+		for( int  update:updates )   if( update >= 1 )  count =count+1;
 		
 		return   count;
 	}
@@ -62,11 +62,11 @@ public  class  ConnectionUtils
 		return  params;
 	}
 	
-	public  static  List<Object[]>  prepare( List<?>  records,List<String>  fields,Map<String,Field>  columnBeanFieldMapper )  throws  IllegalArgumentException, IllegalAccessException
+	public  static  List<Object[]>  prepare( List<?>  rcs,List<String>  fields,Map<String,Field>  columnBeanFieldMapper )  throws  IllegalArgumentException, IllegalAccessException
 	{
 		List<Object[]>  params = new  LinkedList<Object[]>();
 		
-		for(Object  record : records )
+		for(Object  record : rcs )
 		{
 			Object[]  values  = new  Object[ fields.size() ];
 			
@@ -78,6 +78,8 @@ public  class  ConnectionUtils
 				
 				values[ i ]    = columnField.get(   record );
 			}
+			
+			params.add(  values );
 		}
 		
 		return  params;
@@ -102,7 +104,7 @@ public  class  ConnectionUtils
 				statement.setObject(j+1,params[i][j]);
 			}
 			
-			statement.addBatch();
+			statement.addBatch( );
 		}
 		
 		return  statement;
