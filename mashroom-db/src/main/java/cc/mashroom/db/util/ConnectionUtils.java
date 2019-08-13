@@ -53,7 +53,7 @@ public  class  ConnectionUtils
 		{
 			Object[]  values  = new  Object[ fields.size() ];
 			
-			for( int  i = 0,length = fields.size();i < length;i = i+1 )
+			for( int  i = 0,length = fields.size();i <length; i = i+1 )
 			{
 				values[i] = record.get(fields.get(i));
 			}
@@ -70,9 +70,13 @@ public  class  ConnectionUtils
 		{
 			Object[]  values  = new  Object[ fields.size() ];
 			
-			for( int  i = 0,length = fields.size();i < length;i = i+1 )
+			for( int  i = 0,length = fields.size();i <length; i = i+1 )
 			{
-				values[i] = columnBeanFieldMapper.get(fields.get(i)).get( record );
+				Field  columnField = columnBeanFieldMapper.get( fields.get(i) );
+				
+				columnField.setAccessible(     true );
+				
+				values[ i ]    = columnField.get(   record );
 			}
 		}
 		
