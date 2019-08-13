@@ -56,7 +56,7 @@ public  class  RecordUtils
 		{
 			T  record = (T)  (java.util.Map.class.isAssignableFrom(resultBeanClazz) ? new  HashMap<String,Object>() : resultBeanClazz.newInstance() );
 			
-			for( int  i = 1;i <= cursor.getColumnsCount()-1;i = i+ 1 )
+			for( int  i = 1;  i <= cursor.getColumnsCount(); i = i+1 )
 			{
 				if( record instanceof java.util.Map )
 				{
