@@ -29,7 +29,7 @@ public  class  Db  implements  Plugin
 		}
 		catch(  Exception  e )
 		{
-			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** DB  PLUGIN **  db  initialization  error" );
+			throw  new  IllegalStateException( "MASHROOM-PLUGIN:  ** DB  PLUGIN **  db  initialization  error",e );
 		}
 	}
 	
