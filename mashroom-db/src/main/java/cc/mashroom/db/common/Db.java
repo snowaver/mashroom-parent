@@ -21,34 +21,41 @@ import  cc.mashroom.db.connection.Connection;
 
 public  class  Db
 {
-	public  static  <T>  T  tx( String  dataSourceName,int  transactionIsolationLevel,Callback  callback )  throws  Exception
+	public  static  <T>  T  tx( String  dataSourceName,int  transactionIsolationLevel,Callback  callback )  throws  RuntimeException
 	{
-		try( Connection  connection = ConnectionManager.INSTANCE.getConnection(dataSourceName,false).setAutoCommit(transactionIsolationLevel == java.sql.Connection.TRANSACTION_NONE) )
+		try
 		{
-			try
+			try( Connection  connection = ConnectionManager.INSTANCE.getConnection(dataSourceName,false).setAutoCommit(transactionIsolationLevel == java.sql.Connection.TRANSACTION_NONE) )
 			{
-				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.setTransactionIsolation( transactionIsolationLevel );
-				
-				T  returned  = (T)  callback.execute( connection );
-				
-				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.commit(  );
-				
-				return  returned;
-			}
-			catch( Throwable  e )
-			{
-				if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.rollback();
-				
-				throw  new  RuntimeException( e.getMessage() , e );
-			}
-			finally
-			{
-				ConnectionThreadReference.remove( dataSourceName );
+				try
+				{
+					if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.setTransactionIsolation( transactionIsolationLevel );
+					
+					T  returned  = (T)  callback.execute( connection );
+					
+					if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.commit(  );
+					
+					return  returned;
+				}
+				catch( Throwable  e )
+				{
+					if( transactionIsolationLevel != java.sql.Connection.TRANSACTION_NONE )  connection.rollback();
+					
+					throw    e;
+				}
+				finally
+				{
+					ConnectionThreadReference.remove( dataSourceName );
+				}
 			}
 		}
+		catch(   Throwable  e )
+		{
+			throw  new  RuntimeException( e );
+		}
 	}
-		
-	public  interface    Callback
+	
+	public  interface  Callback
 	{
 		public  Object  execute( Connection  connection )  throws  Throwable;
 	}
