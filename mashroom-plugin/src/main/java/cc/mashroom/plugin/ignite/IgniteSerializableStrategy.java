@@ -16,9 +16,8 @@
 package cc.mashroom.plugin.ignite;
 
 import  cc.mashroom.util.collection.map.Map;
-import  cc.mashroom.xcache.SerializableStrategy;
 
-public  class  IgniteSerializableStrategy  implements  SerializableStrategy
+public  class  IgniteSerializableStrategy
 {
 	public  Map  read( Object  serializedObject )
 	{
