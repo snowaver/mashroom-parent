@@ -37,7 +37,7 @@ import  okhttp3.OkHttpClient;
 import  okhttp3.Request;
 import  okhttp3.Response;
 
-public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
+public  class    DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
 	public  DefaultServiceListRequestStrategy( @Nonnull  Collection<String>  urls,@Nonnull  SSLSocketFactory  sslSocketFactory,long  timeout,@Nonnull  TimeUnit  timeunit )
 	{
@@ -51,14 +51,14 @@ public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequest
 	@Accessors( chain= true )
 	private  Collection<String>   urls;
 		
-	public  List<Service>  request()
+	public  List<Service>     request()
 	{
-		return  invokeAny( true,urls );
+		return  invokeAny( urls );
 	}
 	
-	private  List<Service>  invokeAny( boolean  isErrorPermissible    ,Collection<String>  urls )
+	private  List<Service>  invokeAny(Collection<String>  urls )
 	{
-		final  List<Service>  balancingProxies = new  LinkedList<Service>();
+		final  List<Service>  balancingProxies  =  new  LinkedList<Service>();
 		
 		if( urls.isEmpty() )
 		{
@@ -79,7 +79,7 @@ public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequest
 					{
 						try( Response  response = client.newCall(new  Request.Builder().url(url).build()).execute() )
 						{
-							synchronized( DefaultServiceListRequestStrategy.class )
+							synchronized(        DefaultServiceListRequestStrategy.class )
 							{
 								if( balancingProxies.isEmpty() )
 								{

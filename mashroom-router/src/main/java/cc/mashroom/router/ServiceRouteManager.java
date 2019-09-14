@@ -15,6 +15,7 @@
  */
 package cc.mashroom.router;
 
+import  java.util.ArrayList;
 import  java.util.List;
 import  java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,24 +25,28 @@ import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  lombok.AccessLevel;
 import  lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import  lombok.Setter;
+import  lombok.experimental.Accessors;
 
 @NoArgsConstructor( access  = AccessLevel.PRIVATE )
 
 public  class  ServiceRouteManager
 {
-	public  final  static  ServiceRouteManager  INSTANCE = new  ServiceRouteManager();
 	@Accessors(chain=true )
 	@Setter
 	private  ServiceListRequestStrategy   strategy;
+	@Accessors(chain=true )
+	@Setter
+	private  ServiceRouteListener    routeListener;
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
 	
 	private  AtomicBoolean  requesting = new  AtomicBoolean( false );
-		
+	
+	public  final  static  ServiceRouteManager  INSTANCE= new  ServiceRouteManager();
+	
 	public  Service  current(      Schema  schema )
 	{
 		return  currents.get(   schema );
@@ -59,22 +64,34 @@ public  class  ServiceRouteManager
 			}
 			
 			requesting.compareAndSet(true, false );
+			
+			if( routeListener   != null )
+			{
+				this.routeListener.onRequestComplete( new  ArrayList<Service>(services.values()) );
+			}
 		}
 	}
 	
 	public   Service  tryNext(     Schema  schema )
 	{
-		Service  currentService = this.currents.get( schema );
-		
 		List<Service>  pendingServices = this.services.get( schema );
 		
-		if( pendingServices.isEmpty()   )
+		Service  currentService = this.currents.get( schema );
+		
+		if(   pendingServices.isEmpty() )
 		{
 			return    null;
 		}
 		else
 		{
-			return  pendingServices.get( currentService== null || pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1 );
+			Service   next = pendingServices.get( currentService == null || pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1 );
+			
+			if( routeListener   != null )
+			{
+				routeListener.onChange( schema,currentService,next );
+			}
+			
+			return    next;
 		}
 	}
 }

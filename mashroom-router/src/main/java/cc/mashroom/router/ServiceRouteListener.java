@@ -17,7 +17,9 @@ package cc.mashroom.router;
 
 import  java.util.List;
 
-public  interface  ServiceRouteChangeListener
+public  interface  ServiceRouteListener
 {
-	public  void  onRequestComplete( int  code,List<Service>  services,Throwable  error );
+	public  void  onRequestComplete( List<Service>  services );
+	
+	public  void  onChange( Schema  schema,Service  oldService,Service  newService );
 }
