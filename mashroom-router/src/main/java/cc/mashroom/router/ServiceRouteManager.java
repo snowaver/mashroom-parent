@@ -24,13 +24,16 @@ import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  lombok.AccessLevel;
 import  lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @NoArgsConstructor( access  = AccessLevel.PRIVATE )
 
 public  class  ServiceRouteManager
 {
 	public  final  static  ServiceRouteManager  INSTANCE = new  ServiceRouteManager();
-	
+	@Accessors(chain=true )
+	@Setter
 	private  ServiceListRequestStrategy   strategy;
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
