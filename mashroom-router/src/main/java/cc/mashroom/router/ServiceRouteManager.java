@@ -16,6 +16,7 @@
 package cc.mashroom.router;
 
 import  java.util.List;
+import  java.util.concurrent.atomic.AtomicBoolean;
 
 import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
@@ -34,7 +35,29 @@ public  class  ServiceRouteManager
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
-	private  Map<Schema , Service>    currents= new  HashMap<Schema,Service>();
+	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
+	
+	private  AtomicBoolean  requesting = new  AtomicBoolean( false );
+		
+	public  Service  current(      Schema  schema )
+	{
+		return  currents.get(   schema );
+	}
+	
+	public  void  request()
+	{
+		System.out.println( "MASHROOM-ROUTER:  ** SERVICE  ROUTE  MANAGER **  prepare  for  requesting  service  list." );
+		
+		if( requesting.compareAndSet(false, true) )
+		{
+			for(  Service  service : this.strategy.request() )
+			{
+				this.services.put( Schema.valueOf(service.getSchema().toString().toLowerCase())   , service );
+			}
+			
+			requesting.compareAndSet(true, false );
+		}
+	}
 	
 	public   Service  tryNext(     Schema  schema )
 	{
@@ -42,26 +65,13 @@ public  class  ServiceRouteManager
 		
 		List<Service>  pendingServices = this.services.get( schema );
 		
-		if( pendingServices.isEmpty() )
+		if( pendingServices.isEmpty()   )
 		{
 			return    null;
 		}
 		else
 		{
 			return  pendingServices.get( currentService== null || pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1 );
-		}
-	}
-	
-	public  Service  current(      Schema  schema )
-	{
-		return  currents.get( schema );
-	}
-	
-	public  void  request()
-	{
-		for( Service  service: strategy.request() )
-		{
-			this.services.put( Schema.valueOf(service.getSchema().toString().toLowerCase())   , service );
 		}
 	}
 }
