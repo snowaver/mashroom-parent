@@ -15,7 +15,6 @@
  */
 package cc.mashroom.router;
 
-import  java.net.URL;
 import  java.util.Collection;
 import  java.util.LinkedList;
 import  java.util.List;
@@ -39,30 +38,36 @@ import  okhttp3.Response;
 
 public  class    DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
-	public  DefaultServiceListRequestStrategy( @Nonnull  Collection<String>  urls,@Nonnull  SSLSocketFactory  sslSocketFactory,long  timeout,@Nonnull  TimeUnit  timeunit )
+	public  DefaultServiceListRequestStrategy( @Nonnull  Collection<String>  urls,@Nonnull  SSLSocketFactory  sslSocketFactory,long  timeout,@Nonnull  TimeUnit  timeoutTimeUnit )
 	{
-		this.setUrls(urls).setClient( new  OkHttpClient.Builder().hostnameVerifier(new  NoopHostnameVerifier()).sslSocketFactory(sslSocketFactory,new  NoopX509TrustManager()).connectTimeout(5,TimeUnit.SECONDS).writeTimeout(5,TimeUnit.SECONDS).readTimeout(timeout,timeunit).build() );
+		this.setTimeout(timeout).setTimeoutTimeUnit(timeoutTimeUnit).setUrls(urls).setClient( new  OkHttpClient.Builder().hostnameVerifier(new  NoopHostnameVerifier()).sslSocketFactory(sslSocketFactory,new  NoopX509TrustManager()).connectTimeout(5,TimeUnit.SECONDS).writeTimeout(5,TimeUnit.SECONDS).readTimeout(10,TimeUnit.SECONDS).build() );
 	}
 	
 	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
-	private  OkHttpClient  client;
+	@Accessors( chain=true )
+	private  OkHttpClient   client;
 	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
+	@Accessors( chain=true )
 	private  Collection<String>   urls;
+	@Setter( value= AccessLevel.PROTECTED )
+	@Accessors( chain=true )
+	private  long    timeout;
+	@Setter( value= AccessLevel.PROTECTED )
+	@Accessors( chain=true )
+	private  TimeUnit  timeoutTimeUnit;
 		
 	public  List<Service>     request()
 	{
-		return  invokeAny( urls );
+		return  invokeAny(  urls );
 	}
 	
 	private  List<Service>  invokeAny(Collection<String>  urls )
 	{
-		final  List<Service>  balancingProxies  =  new  LinkedList<Service>();
+		final  List<Service>  services          =  new  LinkedList<Service>();
 		
 		if( urls.isEmpty() )
 		{
-			return    balancingProxies;
+			return services;
 		}
 		
 		ThreadPoolExecutor  executor = new  ThreadPoolExecutor( urls.size(),urls.size(),60,TimeUnit.SECONDS,new  LinkedBlockingQueue<Runnable>() );
@@ -77,23 +82,15 @@ public  class    DefaultServiceListRequestStrategy  implements  ServiceListReque
 				{
 					public  void  run()
 					{
-						try( Response  response = client.newCall(new  Request.Builder().url(url).build()).execute() )
+						try( Response  response =client.newCall(new  Request.Builder().url(url).build()).execute() )
 						{
-							synchronized(        DefaultServiceListRequestStrategy.class )
+							synchronized(         DefaultServiceListRequestStrategy.this )
 							{
-								if( balancingProxies.isEmpty() )
+								if(         services.isEmpty() )
 								{
 									if( response.code() == 200 )
 									{
-										String  connectingHost  = new  URL(url).getHost();
-										
-										for( Service  balancingProxy : (List<Service>)  JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)) )
-										{
-											if( connectingHost.equals(balancingProxy.getHost().trim()) )
-											{
-												balancingProxies.add(    balancingProxy );
-											}
-										}
+										services.addAll( (List<Service>)  JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)) );
 									}
 								}
 							}
@@ -113,20 +110,22 @@ public  class    DefaultServiceListRequestStrategy  implements  ServiceListReque
 		
 		try
 		{
-			cdlatcher.await( 5,TimeUnit.SECONDS );
+			cdlatcher.await(this.timeout,this.timeoutTimeUnit );
 		}
-		catch( InterruptedException  e )
+		catch(InterruptedException  e )
 		{
 			
 		}
-		
-		executor.shutdownNow();
-		
-		return    balancingProxies;
-		/*
-		if( balancingProxies.isEmpty() )
+		finally
 		{
-			throw  new  IllegalStateException( "SQUIRREL-ROUTER:  ** DEFAULT  BALANCING  PROXY  FACTORY **  no  proxy  is  available" );
+			executor.shutdownNow();
+		}
+		
+		return     services;
+		/*
+		if( balancingProxies.isEmpty())
+		{
+			throw  new  IllegalStateException( "SQUIRREL-ROUTER:  ** DEFAULT  SERVICE  LIST  REQUESST  STRATEGY **  no  service  is  available." );
 		}
 		*/
 	}
