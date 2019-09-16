@@ -23,6 +23,7 @@ import  org.apache.commons.lang3.RandomUtils;
 
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
+import lombok.Getter;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
@@ -36,7 +37,7 @@ public  class  ServiceRouteManager
 	@Accessors(chain=true )
 	@Setter
 	private  ServiceListRequestStrategy   strategy;
-	
+	@Getter
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
