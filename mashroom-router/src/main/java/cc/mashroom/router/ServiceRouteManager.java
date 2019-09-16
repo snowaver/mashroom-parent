@@ -63,6 +63,15 @@ public  class  ServiceRouteManager
 		}
 	}
 	
+	public  boolean  require( Schema  ...  schemas)
+	{
+		for( Schema  schema :   schemas )
+		{
+			if( !    services.containsKey(schema) )     return false;
+		}
+		return  true;
+	}
+	
 	public   Service  tryNext(     Schema  schema )
 	{
 		List<Service>  pendingServices = this.services.get( schema );
