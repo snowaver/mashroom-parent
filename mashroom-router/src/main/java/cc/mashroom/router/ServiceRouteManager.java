@@ -15,6 +15,8 @@
  */
 package cc.mashroom.router;
 
+import  java.util.ArrayList;
+import  java.util.Collection;
 import  java.util.List;
 import  java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,7 +25,6 @@ import  org.apache.commons.lang3.RandomUtils;
 
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
-import lombok.Getter;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
@@ -37,12 +38,19 @@ public  class  ServiceRouteManager
 	@Accessors(chain=true )
 	@Setter
 	private  ServiceListRequestStrategy   strategy;
-	@Getter
+	
+	private  Map<Long,Service>  ids   = new  HashMap<Long,Service>();
+	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
 	
-	private  AtomicBoolean  requesting = new  AtomicBoolean( false );
+	private  AtomicBoolean  requesting= new  AtomicBoolean(  false );
+	
+	public   List<Service>  getServices()
+	{
+		return  new  ArrayList<Service>(    this.services.values() );
+	}
 	
 	public  Service  current(      Schema  schema )
 	{
@@ -55,22 +63,26 @@ public  class  ServiceRouteManager
 		
 		if( requesting.compareAndSet(false, true) )
 		{
-			for(  Service  service : this.strategy.request() )
-			{
-				this.services.put( Schema.valueOf(service.getSchema().toString().toLowerCase())   , service );
-			}
+			add(    strategy.request() );
 			
-			requesting.compareAndSet(true, false );
+			requesting.compareAndSet(true ,false );
 		}
 	}
 	
-	public  boolean  require( Schema  ...  schemas)
+	public  void  add(     Collection<Service>   newServices )
 	{
-		for( Schema  schema :   schemas )
+		for(    Service  newService : newServices )
 		{
-			if( !    services.containsKey(schema) )     return false;
+			Service  oldService   = ids.remove( newService.getId() );
+			
+			if(      oldService != null )
+			{
+				this.services.removeMapping( Schema.valueOf(oldService.getSchema()),oldService );
+			}
+			this.ids.put(     newService.getId(),newService );
+			
+			this.services.put( Schema.valueOf(newService.getSchema().toLowerCase()),newService );
 		}
-		return  true;
 	}
 	
 	public   Service  tryNext(     Schema  schema )
