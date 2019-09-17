@@ -18,7 +18,10 @@ package cc.mashroom.router;
 import  java.util.ArrayList;
 import  java.util.Collection;
 import  java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import  java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nonnull;
 
 import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import  org.apache.commons.lang3.RandomUtils;
@@ -35,9 +38,11 @@ public  class  ServiceRouteManager
 		this.strategy  = strategy;
 	}
 	
-	@Accessors(chain=true )
+	@Accessors( chain=true )
 	@Setter
 	private  ServiceListRequestStrategy   strategy;
+	
+	private  List<ServiceRouteListener>   listeners       = new  CopyOnWriteArrayList<ServiceRouteListener>();
 	
 	private  Map<Long,Service>  ids   = new  HashMap<Long,Service>();
 	
@@ -46,6 +51,16 @@ public  class  ServiceRouteManager
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
 	
 	private  AtomicBoolean  requesting= new  AtomicBoolean(  false );
+	
+	public  void  addListener(      @Nonnull  ServiceRouteListener  listener  )
+	{
+		this.listeners.add(   listener );
+	}
+	
+	public  void  removeListener(   @Nonnull  ServiceRouteListener  listener  )
+	{
+		this.listeners.remove(listener );
+	}
 	
 	public   List<Service>  getServices()
 	{
@@ -57,13 +72,21 @@ public  class  ServiceRouteManager
 		return  currents.get(   schema );
 	}
 	
-	public  void  request()
+	public  void   request()
 	{
 		System.out.println( "MASHROOM-ROUTER:  ** SERVICE  ROUTE  MANAGER **  prepare  for  requesting  service  list." );
 		
 		if( requesting.compareAndSet(false, true) )
 		{
-			add(    strategy.request() );
+			List<Service>  services = this.strategy.request();
+			
+			try
+			{
+				for( ServiceRouteListener  listener :this.listeners )  listener.onRequestComplete( services );
+			}
+			catch( Throwable   e )    { e.printStackTrace(); }
+			
+			add( services );
 			
 			requesting.compareAndSet(true ,false );
 		}
@@ -91,13 +114,15 @@ public  class  ServiceRouteManager
 		
 		Service  currentService = this.currents.get( schema );
 		
-		if(   pendingServices.isEmpty() )
+		Service  nextService = pendingServices.isEmpty() ? null : pendingServices.get( currentService == null ? RandomUtils.nextInt(0,pendingServices.size()) : (pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1) );
 		{
-			return    null;
+			try
+			{
+				for( ServiceRouteListener  listener :this.listeners )  listener.onChanged( currentService , nextService );
+			}
+			catch( Throwable   e )    { e.printStackTrace(); }
 		}
-		else
-		{
-			return    pendingServices.get( currentService == null ? RandomUtils.nextInt(0,pendingServices.size()) : (pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1) );
-		}
+		
+		return  nextService;
 	}
 }
