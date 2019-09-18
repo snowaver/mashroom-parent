@@ -27,6 +27,7 @@ import  org.apache.commons.lang3.RandomUtils;
 
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
+import  lombok.Getter;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
@@ -48,6 +49,8 @@ public  class  ServiceRouteManager
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
+	@Getter
+	private  boolean  isRequested= false;
 	
 	public  void  addListener(      @Nonnull  ServiceRouteListener  listener  )
 	{
@@ -69,8 +72,18 @@ public  class  ServiceRouteManager
 		return  currents.get(   schema );
 	}
 	
+	public  void     clear()
+	{
+		services.clear();
+		
+		this.ids.clear();
+		
+		currents.clear();
+	}
+	
 	public  synchronized  void  request()
 	{
+//		if( !  isRequested )
 		{
 			try
 			{
@@ -86,7 +99,14 @@ public  class  ServiceRouteManager
 			}
 			catch( Throwable  th )   { th.printStackTrace(); }
 			
-			add( services );
+			if( !    services.isEmpty() )
+			{
+				clear( );
+				
+				add(   services );
+				
+				this.isRequested =  true;
+			}
 		}
 	}
 	
