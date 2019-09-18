@@ -132,6 +132,8 @@ public  class  ServiceRouteManager
 		Service  currentService = this.currents.get( schema );
 		
 		Service  nextService = pendingServices.isEmpty() ? null : pendingServices.get( currentService == null ? RandomUtils.nextInt(0,pendingServices.size()) : (pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1) );
+		
+		this.currents.put(  schema ,  nextService);
 		{
 			try
 			{
