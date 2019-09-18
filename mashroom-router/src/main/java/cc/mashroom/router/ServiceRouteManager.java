@@ -94,7 +94,7 @@ public  class  ServiceRouteManager
 			
 			try
 			{
-				for( ServiceRouteListener  listener :this.listeners )  listener.onRequestComplete( services );
+				for( ServiceRouteListener  listener :this.listeners )   listener.onRequestComplete( services );
 			}
 			catch( Throwable  th )   { th.printStackTrace(); }
 			
@@ -117,11 +117,11 @@ public  class  ServiceRouteManager
 			
 			if(      oldService != null )
 			{
-				this.services.removeMapping( Schema.valueOf(oldService.getSchema()), oldService );
+				this.services.removeMapping( Schema.valueOf(oldService.getSchema().toUpperCase()),oldService );
 			}
 			this.ids.put(     newService.getId(),newService );
 			
-			this.services.put( Schema.valueOf(newService.getSchema().toLowerCase()), newService );
+			this.services.put( Schema.valueOf(newService.getSchema().toUpperCase()),newService  );
 		}
 	}
 	
