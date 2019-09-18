@@ -19,6 +19,8 @@ import  java.util.List;
 
 public  interface  ServiceRouteListener
 {
+	public  void  onBeforeRequest();
+	
 	public  void  onRequestComplete( List<Service>  services );
 	
 	public  void  onChanged( Service  oldService,Service  newService );

@@ -19,7 +19,6 @@ import  java.util.ArrayList;
 import  java.util.Collection;
 import  java.util.List;
 import  java.util.concurrent.CopyOnWriteArrayList;
-import  java.util.concurrent.atomic.AtomicBoolean;
 
 import  javax.annotation.Nonnull;
 
@@ -50,8 +49,6 @@ public  class  ServiceRouteManager
 	
 	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
 	
-	private  AtomicBoolean  requesting= new  AtomicBoolean(  false );
-	
 	public  void  addListener(      @Nonnull  ServiceRouteListener  listener  )
 	{
 		this.listeners.add(   listener );
@@ -72,23 +69,24 @@ public  class  ServiceRouteManager
 		return  currents.get(   schema );
 	}
 	
-	public  void   request()
+	public  synchronized  void  request()
 	{
-		System.out.println( "MASHROOM-ROUTER:  ** SERVICE  ROUTE  MANAGER **  prepare  for  requesting  service  list." );
-		
-		if( requesting.compareAndSet(false, true) )
 		{
+			try
+			{
+				for( ServiceRouteListener  listener :this.listeners )  listener.onBeforeRequest();
+			}
+			catch( Throwable  th )   { th.printStackTrace(); }
+			
 			List<Service>  services = this.strategy.request();
 			
 			try
 			{
 				for( ServiceRouteListener  listener :this.listeners )  listener.onRequestComplete( services );
 			}
-			catch( Throwable   e )    { e.printStackTrace(); }
+			catch( Throwable  th )   { th.printStackTrace(); }
 			
 			add( services );
-			
-			requesting.compareAndSet(true ,false );
 		}
 	}
 	
@@ -100,11 +98,11 @@ public  class  ServiceRouteManager
 			
 			if(      oldService != null )
 			{
-				this.services.removeMapping( Schema.valueOf(oldService.getSchema()),oldService );
+				this.services.removeMapping( Schema.valueOf(oldService.getSchema()), oldService );
 			}
 			this.ids.put(     newService.getId(),newService );
 			
-			this.services.put( Schema.valueOf(newService.getSchema().toLowerCase()),newService );
+			this.services.put( Schema.valueOf(newService.getSchema().toLowerCase()), newService );
 		}
 	}
 	
@@ -120,7 +118,7 @@ public  class  ServiceRouteManager
 			{
 				for( ServiceRouteListener  listener :this.listeners )  listener.onChanged( currentService , nextService );
 			}
-			catch( Throwable   e )    { e.printStackTrace(); }
+			catch( Throwable  th )   { th.printStackTrace(); }
 		}
 		
 		return  nextService;
