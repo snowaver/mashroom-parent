@@ -15,13 +15,12 @@
  */
 package cc.mashroom.db.util;
 
-import  javax.annotation.Nonnull;
-
 import  cc.mashroom.config.Properties;
+import  lombok.NonNull;
 
 public  class  DataSourceUtils
 {
-	public  static  Properties  createDataSourceProperties( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
+	public  static  Properties  createDataSourceProperties( @NonNull  String  driverClassName,@NonNull  String  dataSourceName,@NonNull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )
 	{
 		Properties  properties = new  Properties();
 		

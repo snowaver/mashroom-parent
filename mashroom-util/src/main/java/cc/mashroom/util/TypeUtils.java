@@ -15,12 +15,13 @@
  */
 package cc.mashroom.util;
 
-import  javax.annotation.Nonnull;
 import  javax.annotation.Nullable;
+
+import  lombok.NonNull;
 
 public  class  TypeUtils
 {
-	public  static  boolean  isPresent( @Nonnull  String  className,@Nullable  ClassLoader  classLoader )
+	public  static  boolean  isPresent( @NonNull  String  className,@Nullable  ClassLoader  classLoader )
 	{
 		try
 		{

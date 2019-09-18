@@ -20,11 +20,10 @@ import  java.util.Collection;
 import  java.util.List;
 import  java.util.concurrent.CopyOnWriteArrayList;
 
-import  javax.annotation.Nonnull;
-
 import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import  org.apache.commons.lang3.RandomUtils;
 
+import  cc.mashroom.util.CollectionUtils;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  lombok.Getter;
@@ -52,14 +51,14 @@ public  class  ServiceRouteManager
 	@Getter
 	private  boolean  isRequested= false;
 	
-	public  void  addListener(      @Nonnull  ServiceRouteListener  listener  )
+	public  void  addListener(       ServiceRouteListener  listener )
 	{
-		this.listeners.add(   listener );
+		CollectionUtils.addIfAbsent( this.listeners,listener);
 	}
 	
-	public  void  removeListener(   @Nonnull  ServiceRouteListener  listener  )
+	public  void  removeListener(    ServiceRouteListener  listener )
 	{
-		this.listeners.remove(listener );
+		CollectionUtils.remove(      this.listeners,listener);
 	}
 	
 	public   List<Service>  getServices()

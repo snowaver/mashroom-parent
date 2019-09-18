@@ -23,13 +23,13 @@ import  java.util.concurrent.LinkedBlockingQueue;
 import  java.util.concurrent.ThreadPoolExecutor;
 import  java.util.concurrent.TimeUnit;
 
-import  javax.annotation.Nonnull;
 import  javax.net.ssl.SSLSocketFactory;
 
 import  cc.mashroom.util.JsonUtils;
 import  cc.mashroom.util.NoopHostnameVerifier;
 import  cc.mashroom.util.NoopX509TrustManager;
 import  lombok.AccessLevel;
+import  lombok.NonNull;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 import  okhttp3.OkHttpClient;
@@ -38,7 +38,7 @@ import  okhttp3.Response;
 
 public  class    DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
-	public  DefaultServiceListRequestStrategy( @Nonnull  Collection<String>  urls,@Nonnull  SSLSocketFactory  sslSocketFactory,long  timeout,@Nonnull  TimeUnit  timeoutTimeUnit )
+	public  DefaultServiceListRequestStrategy( @NonNull  Collection<String>  urls,@NonNull  SSLSocketFactory  sslSocketFactory,long  timeout,@NonNull  TimeUnit  timeoutTimeUnit )
 	{
 		this.setTimeout(timeout).setTimeoutTimeUnit(timeoutTimeUnit).setUrls(urls).setClient( new  OkHttpClient.Builder().hostnameVerifier(new  NoopHostnameVerifier()).sslSocketFactory(sslSocketFactory,new  NoopX509TrustManager()).connectTimeout(5,TimeUnit.SECONDS).writeTimeout(5,TimeUnit.SECONDS).readTimeout(10,TimeUnit.SECONDS).build() );
 	}

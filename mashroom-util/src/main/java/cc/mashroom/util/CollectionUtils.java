@@ -15,10 +15,27 @@
  */
 package cc.mashroom.util;
 
+import  java.util.Collection;
 import  java.util.List;
 
+import  lombok.NonNull;
+
 public  class  CollectionUtils
-{	
+{
+	public  static  <T>  Collection<T>  addIfAbsent( @NonNull  Collection<T>  collection,@NonNull  T  element )
+	{
+		if( !collection.contains(element) )  collection.add(element );
+		
+		return collection;
+	}
+	
+	public  static  <T>  Collection<T>  remove(      @NonNull  Collection<T>  collection,@NonNull  T  element )
+	{
+		collection.remove(       element );
+		
+		return collection;
+	}
+	
 	public  static  Long[]  toLongArray( Object...  objects )
 	{
 		Long[]  longArray= new  Long[ objects.length ];

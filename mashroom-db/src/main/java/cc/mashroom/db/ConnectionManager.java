@@ -17,8 +17,6 @@ package cc.mashroom.db;
 
 import  java.util.Map.Entry;
 
-import  javax.annotation.Nonnull;
-
 import  cc.mashroom.config.Config;
 import  cc.mashroom.config.Properties;
 import  cc.mashroom.db.connection.Connection;
@@ -29,6 +27,7 @@ import  cc.mashroom.util.collection.map.Map;
 import  lombok.AccessLevel;
 import  lombok.Getter;
 import  lombok.NoArgsConstructor;
+import  lombok.NonNull;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
@@ -56,12 +55,12 @@ public  class  ConnectionManager
 	
 	public  final  static  ConnectionManager  INSTANCE= new  ConnectionManager();
 	
-	public  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )  throws  Exception
+	public  void  addDataSource( @NonNull  String  driverClassName,@NonNull  String  dataSourceName,@NonNull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery )  throws  Exception
 	{
 		addDataSource( driverClassName,dataSourceName,jdbcUrl,user,password,minPoolSize,maxPoolSize,idleConnectionTestPeriod,preferredTestQuery,false );
 	}
 	
-	public  void  addDataSource( @Nonnull  String  driverClassName,@Nonnull  String  dataSourceName,@Nonnull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery,boolean  ignoreIfExists )  throws  Exception
+	public  void  addDataSource( @NonNull  String  driverClassName,@NonNull  String  dataSourceName,@NonNull  String  jdbcUrl,String  user,String  password,Integer  minPoolSize,Integer  maxPoolSize,Long  idleConnectionTestPeriod,String  preferredTestQuery,boolean  ignoreIfExists )  throws  Exception
 	{
 		if( dataSourceProperties.containsKey(dataSourceName) && !ignoreIfExists )
 		{
@@ -82,7 +81,7 @@ public  class  ConnectionManager
 	/**
 	 *  use  the  connection  in  connection  thread  reference  or  create  a  new  one  if  no  connection  held  by  connection  thread  reference.  the  connection  will  be  held  by  connection  thread  reference  if  autoCloseable  is  false.
 	 */
-	public  Connection  getConnection(@Nonnull  String  dataSourceName,boolean  autoClose )  throws  Exception
+	public  Connection  getConnection(@NonNull  String  dataSourceName,boolean  autoClose )  throws  Exception
 	{
 		Connection  connection = ConnectionThreadReference.get( dataSourceName );
 
@@ -119,7 +118,7 @@ public  class  ConnectionManager
 	/**
 	 *  get  the  connection  pool  or  create  a  new  one  by  datasource  name  and  properties  if  absent
 	 */
-	public  ConnectionPool  getConnectionPool(  @Nonnull    final  String  dataSourceName )
+	public  ConnectionPool  getConnectionPool(   @NonNull final  String    dataSourceName )
 	{
 		return  connectionPools.computeIfLackof( dataSourceName,new  Map.Computer<String,ConnectionPool>(){public  ConnectionPool  compute(String  key)  throws  Exception{ return  DataSourceBuilder.build(dataSourceName,dataSourceProperties.get(dataSourceName)); }} );
 	}
