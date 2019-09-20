@@ -45,10 +45,7 @@ public  class  ConnectionManager
 
 	public   void    stop()
 	{
-		for( Entry<String,ConnectionPool>  entry:    connectionPools.entrySet() )
-		{
-			entry.getValue().close();
-		}
+		for( ConnectionPool  connectionPool     : this.connectionPools.values() )      connectionPool.close();
 		
 		connectionPools.clear();
 	}
@@ -71,28 +68,28 @@ public  class  ConnectionManager
 		
 		try
 		{
-			this.getConnection(dataSourceName).close();  // return  Boolean.TRUE;
+			getConnection( dataSourceName ).close();
 		}
 		catch(    Exception  e )
 		{
-			e.printStackTrace();   dataSourceProperties.remove( dataSourceName );  throw e;
+			e.printStackTrace();   dataSourceProperties.remove( dataSourceName );  throw  e;
 		}
 	}
 	/**
 	 *  use  the  connection  in  connection  thread  reference  or  create  a  new  one  if  no  connection  held  by  connection  thread  reference.  the  connection  will  be  held  by  connection  thread  reference  if  autoCloseable  is  false.
 	 */
-	public  Connection  getConnection(@NonNull  String  dataSourceName,boolean  autoClose )  throws  Exception
+	public  Connection  getConnection(@NonNull  String  dataSourceName,boolean  autoClose  ) throws  Exception
 	{
 		Connection  connection = ConnectionThreadReference.get( dataSourceName );
 
 		if( connection == null )
 		{
-			connection = this.getConnectionPool( dataSourceName ).borrowObject();
+			connection =  this.getConnectionPool( dataSourceName).borrowObject();
 		}
 		
 		if( !   autoClose )
 		{
-			ConnectionThreadReference.set( dataSourceName,connection );
+			ConnectionThreadReference.set(dataSourceName,connection );
 		}
 		
 		return  connection;
@@ -100,25 +97,29 @@ public  class  ConnectionManager
 	
 	public  Connection  getConnection(String  dataSourceName )  throws  Exception
 	{
-		return  getConnection( dataSourceName , true );
+		return  getConnection(dataSourceName, true);
 	}
+	
+	public  void  removeDataSource(   String  dataSourceName )
+	{
+		ConnectionPool   connectionPool     = this.connectionPools.remove( dataSourceName );
 		
-	public  void  initialize(  Object...  parameters )throws  Exception
+		if( connectionPool    != null )connectionPool.close();
+	}
+	
+	public  void  initialize(         Object  ... parameters )  throws  Exception
 	{
 		for( Entry<Object,Object>  entry : Config.use(parameters == null || parameters.length == 0 ? "jdbc.properties" : (String)  parameters[0]).entrySet() )
 		{
 			this.dataSourceProperties.computeIfLackof(String.valueOf(entry.getKey()).split("\\.")[1],new  Map.Computer<String,Properties>(){public  Properties  compute(String  key)  throws  Exception{ return  new  Properties(); }}).put( String.valueOf(entry.getKey()).split("\\.")[2],entry.getValue() );
 		}
 		
-		for( String  dataSourceName :   dataSourceProperties.keySet() )
-		{
-			this.getConnection(dataSourceName).close();
-		}
+		for( String  dataSourceName : dataSourceProperties.keySet()  )  getConnection(dataSourceName).close();
 	}
 	/**
-	 *  get  the  connection  pool  or  create  a  new  one  by  datasource  name  and  properties  if  absent
+	 *  get  the  connection  pool  or  create  a  new  one  by  datasource  name
 	 */
-	public  ConnectionPool  getConnectionPool(   @NonNull final  String    dataSourceName )
+	public  ConnectionPool  getConnectionPool( @NonNull  final  String  dataSourceName     )
 	{
 		return  connectionPools.computeIfLackof( dataSourceName,new  Map.Computer<String,ConnectionPool>(){public  ConnectionPool  compute(String  key)  throws  Exception{ return  DataSourceBuilder.build(dataSourceName,dataSourceProperties.get(dataSourceName)); }} );
 	}
