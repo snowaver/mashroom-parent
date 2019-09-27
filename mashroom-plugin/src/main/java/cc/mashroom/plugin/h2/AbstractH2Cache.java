@@ -26,14 +26,10 @@ import  lombok.NoArgsConstructor;
 
 public  class  AbstractH2Cache  //  implements  XCacheStrategy
 {
-	protected  static  final  Map<Object,ReentrantLock>  LOCKERS = new  ConcurrentHashMap<Object,ReentrantLock>();
+	protected  Map<Object,ReentrantLock>  LOCKERS = new  ConcurrentHashMap<Object,ReentrantLock>();
 	
 	public  Lock  getLock( Object  key )
 	{
-		if( LOCKERS.containsKey(key) && !LOCKERS.get(key).isHeldByCurrentThread() )
-		{
-			return  null;
-		}
 		return  LOCKERS.computeIfLackof( key,new  Map.Computer<Object,ReentrantLock>(){public  ReentrantLock  compute(Object  key)  throws  Exception{return  new  ReentrantLock();}} );
 	}
 }
