@@ -20,16 +20,25 @@ import  java.lang.reflect.Field;
 import  java.util.ArrayList;
 import  java.util.List;
 
-public  class  ReflectionUtils
+import lombok.NonNull;
+
+public  class   ReflectionUtils
 {
 	public  static  List<Field>  getAnnotatedFields( Class<?>  clazz,Class<? extends Annotation>  annotation )
 	{
 		return  getAnnotatedFields(null,annotation,clazz);
 	}
 	
+	public  static  Object  getValue( @NonNull  Field  field,@NonNull  Object  object )  throws  IllegalArgumentException,IllegalAccessException
+	{
+		field.setAccessible(     true );
+		
+		return  field.get( object );
+	}
+	
 	public  static  List<Field>  getAnnotatedFields( List<Field>  fields,Class<? extends Annotation>  annotation,Class<?>...  clazzes )
 	{
-		fields = fields != null ? fields : new  ArrayList<Field>();
+		fields = fields != null        ? fields : new  ArrayList<Field>();
 		
 		for( Class<?>  clazz : clazzes )
 		{
@@ -37,6 +46,7 @@ public  class  ReflectionUtils
 			{
 				continue;
 			}
+			
 			for(Field  field : clazz.getDeclaredFields() )
 			{
 				if(field.isAnnotationPresent(annotation) )
@@ -44,6 +54,7 @@ public  class  ReflectionUtils
 					fields.add( field );
 				}
 			}
+			
 			getAnnotatedFields( fields,annotation,clazz.getSuperclass() );
 			
 			getAnnotatedFields( fields,annotation,clazz.getInterfaces() );
