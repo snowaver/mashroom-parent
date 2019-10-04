@@ -18,43 +18,39 @@ package cc.mashroom.xcache;
 import  java.util.List;
 
 import  cc.mashroom.db.common.Db;
+import lombok.Setter;
 
 public  class  CacheFactory
-{
-	public  static  void  setStrategy( CacheFactoryStrategy  strategy )
-	{
-		CacheFactory.strategy   = strategy;
-	}
-	
-	public  static  List<XClusterNode>  getClusterNodes()
+{	
+	public  static  List<XClusterNode>   getClusterNodes()
 	{
 		return  strategy.getClusterNodes();
 	}
-		
+	@Setter
 	private  static  CacheFactoryStrategy  strategy;
-	
-	public  static  long  getNextSequence( String  name )
+
+	public  static  long  getNextSequence( String  name  ,Long  resetValue )
 	{
-		return  strategy.getNextSequence(    name );
+		return  strategy.getNextSequence(name,resetValue);
 	}
 	
 	public  static  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )
 	{
-		return  strategy.getOrCreateKeyValueCache(name );
+		return  strategy.getOrCreateKeyValueCache( name );
 	}
 	
 	public  static  XMemTableCache              getOrCreateMemTableCache( String  name )
 	{
-		return  strategy.getOrCreateMemTableCache(name );
-	}
-	
-	public  static  <V>  V  call( RemoteCallable <V>  callable , List<String>  clusterNodeIds )
-	{
-		return  strategy.call( callable,clusterNodeIds );
+		return  strategy.getOrCreateMemTableCache( name );
 	}
 	
 	public  static  <T>  T  tx( int  transactionIsolationLevel,  Db.Callback  callback )  throws  Exception
 	{
-		return  strategy.tx(   transactionIsolationLevel,   callback );
+		return  strategy.tx(    transactionIsolationLevel,       callback );
+	}
+	
+	public  static  <V>  V  call( RemoteCallable <V>  callable,  List<String>   clusterNodeIds )
+	{
+		return  strategy.call(  callable,clusterNodeIds );
 	}
 }

@@ -24,31 +24,15 @@ public  class  CollectionUtils
 {
 	public  static  <T>  Collection<T>  addIfAbsent( @NonNull  Collection<T>  collection,@NonNull  T  element )
 	{
-		if( !collection.contains(element) )  collection.add(element );
-		
-		return collection;
+		if( !collection.contains(element) )  collection.add(element );  return  collection;
 	}
 	
 	public  static  <T>  Collection<T>  remove(      @NonNull  Collection<T>  collection,@NonNull  T  element )
 	{
-		collection.remove(       element );
-		
-		return collection;
+		collection.remove( element );   return  collection;
 	}
 	
-	public  static  Long[]  toLongArray( Object...  objects )
-	{
-		Long[]  longArray= new  Long[ objects.length ];
-		
-		for( int  i = 0,length = objects.length;i<= length-1;i = i+1 )
-		{
-			longArray[ i ]  = Long.valueOf( objects[ i ].toString() );
-		}
-		
-		return  longArray;
-	}
-	
-	public  static  <T>  T  getFirst(   List<T>  list )
+	public  static  <T>  T  first( List<T>  list )
 	{
 		return  list == null || list.isEmpty() ? null : list.get( 0 );
 	}
