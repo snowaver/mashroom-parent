@@ -21,7 +21,6 @@ import  java.util.List;
 import  java.util.UUID;
 import  java.util.concurrent.atomic.AtomicLong;
 
-import  org.apache.commons.io.IOUtils;
 import  org.hyperic.sigar.Sigar;
 
 import  com.google.common.collect.Lists;
@@ -30,6 +29,7 @@ import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
+import  cc.mashroom.util.IOUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
