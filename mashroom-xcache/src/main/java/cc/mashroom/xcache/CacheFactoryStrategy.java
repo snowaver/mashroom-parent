@@ -18,6 +18,7 @@ package cc.mashroom.xcache;
 import  java.util.List;
 
 import  cc.mashroom.db.common.Db;
+import cc.mashroom.xcache.atomic.XAtomicLong;
 
 public  interface  CacheFactoryStrategy
 {
@@ -25,11 +26,11 @@ public  interface  CacheFactoryStrategy
 	/**
 	 *  increment  the  current  value  and  get.  initial  value  is  zero,  but  don't  reset  the  value  if  reset  initialize  value  is  null.
 	 */
-	public  long  getNextSequence( String  name  , Long  resetInitializeValue );
+	public  XAtomicLong  atomicLong( String  name );
 	
 	public  <R>  R  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
 	
-	public  List<XClusterNode>  getClusterNodes();
+	public  List<XClusterNode>    getClusterNodes();
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name);
 	

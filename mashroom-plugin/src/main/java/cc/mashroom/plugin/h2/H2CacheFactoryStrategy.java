@@ -19,7 +19,6 @@ import  java.lang.management.ManagementFactory;
 import  java.nio.charset.Charset;
 import  java.util.List;
 import  java.util.UUID;
-import  java.util.concurrent.atomic.AtomicLong;
 
 import  org.hyperic.sigar.Sigar;
 
@@ -39,6 +38,8 @@ import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
 import  cc.mashroom.xcache.XKeyValueCache;
 import  cc.mashroom.xcache.XMemTableCache;
+import cc.mashroom.xcache.atomic.NativeAtomicLong;
+import cc.mashroom.xcache.atomic.XAtomicLong;
 import  lombok.SneakyThrows;
 
 public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
@@ -51,7 +52,7 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	private  Map<String,H2KeyValueCache>  keyValueCaches = new  ConcurrentHashMap<String,H2KeyValueCache>();
 	
-	private  Map<String,AtomicLong>  sequenceLongs = new  ConcurrentHashMap<String,AtomicLong>();
+	private  Map<String,XAtomicLong >  atomicLongs = new  ConcurrentHashMap<String, XAtomicLong>();
 	
 	private  Map<String,H2MemTableCache>  memTableCaches = new  ConcurrentHashMap<String,H2MemTableCache>();
 	
@@ -60,14 +61,14 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		throw  new  UnsupportedOperationException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  this  operation  is  not  supported  for  single  node  server" );
 	}
 	
-	public  <T>  T  tx( int  transactionIsolationLevel , Db.Callback  callback )throws  Exception
+	public  <T>  T  tx( int  transactionIsolationLevel , Db.Callback  callback )  throws  Exception
 	{
 		return  Db.tx( "xcache-memtable-datasource", transactionIsolationLevel,callback );
 	}
-	
-	public  long  getNextSequence( String  name ,  Long  resetValue )
+	@Override
+	public  XAtomicLong  atomicLong(String name )
 	{
-		return  (resetValue == null ? this.sequenceLongs : sequenceLongs.addEntry(name,new  AtomicLong(resetValue))).computeIfAbsent(name,(key) -> new  AtomicLong()).incrementAndGet();
+		return  this.atomicLongs.computeIfAbsent( name,(key) -> new  NativeAtomicLong() );
 	}
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )

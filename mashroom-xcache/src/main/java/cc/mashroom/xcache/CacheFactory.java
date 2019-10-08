@@ -18,7 +18,8 @@ package cc.mashroom.xcache;
 import  java.util.List;
 
 import  cc.mashroom.db.common.Db;
-import lombok.Setter;
+import  cc.mashroom.xcache.atomic.XAtomicLong;
+import  lombok.Setter;
 
 public  class  CacheFactory
 {	
@@ -29,9 +30,9 @@ public  class  CacheFactory
 	@Setter
 	private  static  CacheFactoryStrategy  strategy;
 
-	public  static  long  getNextSequence( String  name  ,Long  resetValue )
+	public  static  XAtomicLong  atomicLong(String  name )
 	{
-		return  strategy.getNextSequence(name,resetValue);
+		return  strategy.atomicLong(name );
 	}
 	
 	public  static  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )
@@ -46,7 +47,7 @@ public  class  CacheFactory
 	
 	public  static  <T>  T  tx( int  transactionIsolationLevel,  Db.Callback  callback )  throws  Exception
 	{
-		return  strategy.tx(    transactionIsolationLevel,       callback );
+		return  strategy.tx(    transactionIsolationLevel, callback );
 	}
 	
 	public  static  <V>  V  call( RemoteCallable <V>  callable,  List<String>   clusterNodeIds )

@@ -22,7 +22,6 @@ import  java.util.stream.Collectors;
 
 import  org.apache.commons.io.IOUtils;
 import  org.apache.ignite.Ignite;
-import  org.apache.ignite.IgniteAtomicLong;
 import  org.apache.ignite.Ignition;
 import  org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import  org.apache.ignite.transactions.Transaction;
@@ -33,6 +32,7 @@ import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
+import cc.mashroom.plugin.ignite.atomic.IgniteAtomicLong;
 import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.StringUtils;
 import  cc.mashroom.util.collection.map.HashMap;
@@ -43,6 +43,7 @@ import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
 import  cc.mashroom.xcache.XKeyValueCache;
 import  cc.mashroom.xcache.XMemTableCache;
+import  cc.mashroom.xcache.atomic.XAtomicLong;
 import  lombok.AccessLevel;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
@@ -117,6 +118,11 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 			}
 		}
 	}
+	@Override
+	public  XAtomicLong  atomicLong( String name)
+	{
+		return  new  IgniteAtomicLong(    this.ignite.atomicLong(name,0,true));
+	}
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache(String  name )
 	{
@@ -131,10 +137,5 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 	public  <V>  V  call( RemoteCallable<V>  callable, List<String>   clusterNodeIds )
 	{
 		return  this.ignite.compute(this.ignite.cluster().forPredicate(  (node) -> clusterNodeIds.contains(node.id().toString()))).call( new  IgniteCallable<V>(callable) );
-	}
-	
-	public  long  getNextSequence(   String  name,Long resetValue )
-	{
-		IgniteAtomicLong  atomicLong = this.ignite.atomicLong( name  ,0,true );    if( resetValue != null )  atomicLong.getAndSet( resetValue );  return  atomicLong.incrementAndGet();
 	}
 }
