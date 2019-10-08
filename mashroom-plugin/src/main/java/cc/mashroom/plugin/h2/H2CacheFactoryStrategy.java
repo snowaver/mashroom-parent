@@ -38,8 +38,8 @@ import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
 import  cc.mashroom.xcache.XKeyValueCache;
 import  cc.mashroom.xcache.XMemTableCache;
-import cc.mashroom.xcache.atomic.NativeAtomicLong;
-import cc.mashroom.xcache.atomic.XAtomicLong;
+import  cc.mashroom.xcache.atomic.NativeAtomicLong;
+import  cc.mashroom.xcache.atomic.XAtomicLong;
 import  lombok.SneakyThrows;
 
 public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
