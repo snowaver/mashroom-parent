@@ -33,5 +33,5 @@ public  class  Db  implements  Plugin
 		}
 	}
 	
-	public  void  stop()  { ConnectionManager.INSTANCE.stop(); }
+	public  void   stop()  {ConnectionManager.INSTANCE.stop(); }
 }
