@@ -20,6 +20,7 @@ import  java.util.concurrent.TimeUnit;
 import  java.util.concurrent.locks.Lock;
 
 import  cc.mashroom.xcache.XKeyValueCache;
+import cc.mashroom.xcache.atomic.XAtomicLong;
 
 public  class  SafeCacher
 {
@@ -32,12 +33,12 @@ public  class  SafeCacher
 		
 		try
 		{
-			if( !locker.tryLock(acquireLockTimeout ,acquireLockTimeoutTimeUnit) )
+			if( !locker.tryLock(acquireLockTimeout,acquireLockTimeoutTimeUnit) )
 			{
 				throw  new  IllegalStateException( "SQUIRREL-XCACHE:  ** SAFE  CACHER **  the  lock  is  not  acquired  before  the  waiting  time  (2  seconds)  elapsed,  give  up." );
 			}
 			
-			if( (value = cache.get(key)) == null )       value = callable.call();
+			if( (value = cache.get(key)) == null )      value = callable.call();
 		}
 		catch(Throwable  e )
 		{
@@ -49,5 +50,22 @@ public  class  SafeCacher
 		}
 		
 		return  value;
+	}
+	
+	public  static  boolean  compareAndSet( XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
+	{
+		if( atomicLong.get()  ==     expectValue )
+		{
+			try
+			{
+				return  atomicLong.compareAndSet( expectValue,callable.call() );
+			}
+			catch(Throwable  e )
+			{
+				throw  new  RuntimeException( e );
+			}
+		}
+		
+		return  false;
 	}
 }
