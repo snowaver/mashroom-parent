@@ -20,9 +20,9 @@ import  java.util.concurrent.TimeUnit;
 import  java.util.concurrent.locks.Lock;
 
 import  cc.mashroom.xcache.XKeyValueCache;
-import cc.mashroom.xcache.atomic.XAtomicLong;
+import  cc.mashroom.xcache.atomic.XAtomicLong;
 
-public  class  SafeCacher
+public  class     SafeCacher
 {
 	/**
 	 *  acquire  the  lock,  call  the  callable  and  cache  the  value  if  not  cached,  returns  the  cached  value  and  unlock  the  locker  finally.
