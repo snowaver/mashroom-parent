@@ -38,7 +38,7 @@ public  class  SafeCacher
 				throw  new  IllegalStateException( "SQUIRREL-XCACHE:  ** SAFE  CACHER **  the  lock  is  not  acquired  before  the  waiting  time  (2  seconds)  elapsed,  give  up." );
 			}
 			
-			if( (value = cache.get(key)) == null )      value = callable.call();
+			if( (value = cache.get(key))     == null )  value = callable.call();
 		}
 		catch(Throwable  e )
 		{
@@ -52,18 +52,18 @@ public  class  SafeCacher
 		return  value;
 	}
 	
-	public  static  boolean  compareAndSet( XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
+	public  static  boolean  compareAndSet(XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
 	{
-		if( atomicLong.get()  ==     expectValue )
+		try
 		{
-			try
+			if(     atomicLong.get()  == expectValue )
 			{
 				return  atomicLong.compareAndSet( expectValue,callable.call() );
 			}
-			catch(Throwable  e )
-			{
-				throw  new  RuntimeException( e );
-			}
+		}
+		catch(Throwable  e )
+		{
+			throw  new  RuntimeException( e );
 		}
 		
 		return  false;
