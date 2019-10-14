@@ -33,16 +33,16 @@ public  class  SafeCacher
 		
 		try
 		{
-			if( !locker.tryLock(acquireLockTimeout,acquireLockTimeoutTimeUnit) )
+			if( !locker.tryLock(acquireLockTimeout  ,acquireLockTimeoutTimeUnit) )
 			{
 				throw  new  IllegalStateException( "SQUIRREL-XCACHE:  ** SAFE  CACHER **  the  lock  is  not  acquired  before  the  waiting  time  (2  seconds)  elapsed,  give  up." );
 			}
 			
-			if( (value = cache.get(key))     == null )  value = callable.call();
+			if( (value = cache.get(key)) == null )  value = callable.call();
 		}
 		catch(Throwable  e )
 		{
-			throw  new  RuntimeException( e );
+			throw  new  RuntimeException(e );
 		}
 		finally
 		{
@@ -56,14 +56,19 @@ public  class  SafeCacher
 	{
 		try
 		{
-			if(     atomicLong.get()  == expectValue )
+			if( atomicLong.get() ==  expectValue )
 			{
-				return  atomicLong.compareAndSet( expectValue,callable.call() );
+				Long  value= callable.call();
+				
+				if( value != null )
+				{
+					return  atomicLong.compareAndSet( expectValue , value );
+				}
 			}
 		}
 		catch(Throwable  e )
 		{
-			throw  new  RuntimeException( e );
+			throw  new  RuntimeException(e );
 		}
 		
 		return  false;
