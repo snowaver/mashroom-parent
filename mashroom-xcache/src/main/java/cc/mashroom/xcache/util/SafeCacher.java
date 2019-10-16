@@ -52,6 +52,11 @@ public  class     SafeCacher
 		return  value;
 	}
 	
+	public  static  XAtomicLong  compareAndSetQuietly( XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
+	{
+		compareAndSet( atomicLong,expectValue,callable );return  atomicLong;
+	}
+	
 	public  static  boolean  compareAndSet(XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
 	{
 		try
