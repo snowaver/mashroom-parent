@@ -17,7 +17,7 @@ package cc.mashroom.plugin;
 
 public  interface  Plugin
 {
-	public  void  initialize( Object...  parameters )  throws  Exception;
+	public  void  initialize( Object...  parameters );
 	
 	public  void  stop();
 }

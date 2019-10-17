@@ -81,7 +81,12 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		return  memTableCaches.computeIfLackof(name,new  Map.Computer<String,H2MemTableCache>(){public  H2MemTableCache  compute(String  key)  throws  Exception{return  new  H2MemTableCache(key,cacheRepository);}});
 	}
 	
-	public  void  initialize(       Object  ...  parameters )  throws  Exception
+	public  void  stop()
+	{
+		ConnectionManager.INSTANCE.removeDataSource(       "xcache-memtable-datasource" );
+	}
+	
+	public  void  initialize( Object...  params )
 	{
 		try
 		{
@@ -89,7 +94,7 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		
 			try(      Connection  connection = ConnectionManager.INSTANCE.getConnection("xcache-memtable-datasource") )
 			{
-				connection.runScripts(     IOUtils.resourceToString("/memory-policy.ddl",  Charset.forName("UTF-8")) );
+				connection.runScripts( IOUtils.resourceToString(    params[0].toString() , Charset.forName("UTF-8")) );
 			}
 		}
 		catch( Exception  error )
@@ -111,9 +116,10 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	{
 		return this.localNode.getId().toString();
 	}
-	
+	/*
 	public  void  stop()
 	{
 		ConnectionManager.INSTANCE.stop();
 	}
+	*/
 }

@@ -32,7 +32,7 @@ import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
-import cc.mashroom.plugin.ignite.atomic.IgniteAtomicLong;
+import  cc.mashroom.plugin.ignite.atomic.IgniteAtomicLong;
 import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.StringUtils;
 import  cc.mashroom.util.collection.map.HashMap;
@@ -90,9 +90,16 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 		}
 	}
 	
-	public   void  initialize(   Object   ...  parameters )  throws   Exception
+	public   void  initialize(   Object   ...  parameters )//throws   Throwable
 	{
-		this.setIgnite(Ignition.start(parameters.length > 0 ? parameters[0].toString() : "ignite-config.xml")).setScript( IOUtils.resourceToString(parameters.length > 1 ? parameters[1].toString() : "/memory-policy.ddl",Charset.forName("UTF-8")) );
+		try
+		{
+			this.setIgnite(Ignition.start("ignite-config.xml")).setScript( IOUtils.resourceToString(parameters[0].toString(),Charset.forName("UTF-8")) );
+		}
+		catch( Exception  ex )
+		{
+			throw  new  IllegalStateException( "SQUIRREL-PLUGIN:  ** IGNITE  CACHE  FACTORY  STRATEGY **  ignite  initialization  or  io  error.",  ex );
+		}
 		
 		if( this.ignite.configuration().getDiscoverySpi() instanceof TcpDiscoverySpi && StringUtils.isNotBlank(script) && !ObjectUtils.cast(this.ignite.configuration().getDiscoverySpi(),TcpDiscoverySpi.class).getIpFinder().getRegisteredAddresses().stream().anyMatch((address) -> runScript(script,"xcache-memtable-datasource",address)) )
 		{

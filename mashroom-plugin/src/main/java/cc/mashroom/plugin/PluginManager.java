@@ -15,36 +15,33 @@
  */
 package cc.mashroom.plugin;
 
-import  java.util.LinkedList;
-import  java.util.List;
-
-import  com.google.common.collect.Lists;
-
+import  cc.mashroom.util.collection.map.ConcurrentHashMap;
+import  cc.mashroom.util.collection.map.Map;
 import  lombok.AccessLevel;
 import  lombok.NoArgsConstructor;
 
 @NoArgsConstructor( access=AccessLevel.PRIVATE )
 
-public  class   PluginRegistry
+public  class    PluginManager
 {
-	public  final  static  PluginRegistry  INSTANCE   = new  PluginRegistry();
+	private  Map<Plugin,Object[]>  registeredPlugins = new  ConcurrentHashMap<Plugin,Object[]>();
 	
-	private  List<Plugin>  registeredPlugins = new  LinkedList<Plugin>();
-	
-	public  PluginRegistry  register( Plugin...  plugins )
+	public  PluginManager  register( Plugin  plugin,Object  ... parameters )
 	{
-		registeredPlugins.addAll( Lists.newArrayList(plugins ) );
+		this.registeredPlugins.put(  plugin, parameters );
 		
 		return  this;
 	}
-		
-	public  void  stop()
-	{
-		for( Plugin  plugin : registeredPlugins )  plugin.stop();
-	}
 	
+	public  final  static  PluginManager    INSTANCE = new  PluginManager();
+		
 	public  void  initialize()
 	{
-		for( Plugin  plugin : registeredPlugins )  try{ plugin.initialize(); }  catch(Exception  e){e.printStackTrace(); }
+		this.registeredPlugins.entrySet().forEach((pluginParametersEntry) -> pluginParametersEntry.getKey().initialize(pluginParametersEntry.getValue()) );
+	}
+	
+	public  void  stop()
+	{
+		this.registeredPlugins.keySet().forEach(  (plugin)->plugin.stop() );
 	}
 }
