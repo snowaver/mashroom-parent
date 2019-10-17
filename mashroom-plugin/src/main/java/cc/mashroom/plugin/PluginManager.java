@@ -15,8 +15,8 @@
  */
 package cc.mashroom.plugin;
 
-import  cc.mashroom.util.collection.map.ConcurrentHashMap;
-import  cc.mashroom.util.collection.map.Map;
+import  java.util.LinkedHashMap;
+
 import  lombok.AccessLevel;
 import  lombok.NoArgsConstructor;
 
@@ -24,11 +24,11 @@ import  lombok.NoArgsConstructor;
 
 public  class    PluginManager
 {
-	private  Map<Plugin,Object[]>  registeredPlugins = new  ConcurrentHashMap<Plugin,Object[]>();
+	private  LinkedHashMap<Plugin,Object[]>  registeredPlugins = new  LinkedHashMap<Plugin,Object[]>();
 	
 	public  PluginManager  register( Plugin  plugin,Object  ... parameters )
 	{
-		this.registeredPlugins.put(  plugin, parameters );
+		this.registeredPlugins.put(  plugin ,parameters );
 		
 		return  this;
 	}
