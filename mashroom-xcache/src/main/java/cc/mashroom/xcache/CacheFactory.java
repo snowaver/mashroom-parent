@@ -30,9 +30,9 @@ public  class  CacheFactory
 	@Setter
 	private  static  CacheFactoryStrategy  strategy;
 
-	public  static  XAtomicLong  atomicLong(String  name )
+	public  static  XAtomicLong  atomicLong( String  name,boolean  createIfAbsent )
 	{
-		return  strategy.atomicLong(name );
+		return  strategy.atomicLong(name,createIfAbsent );
 	}
 	
 	public  static  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )

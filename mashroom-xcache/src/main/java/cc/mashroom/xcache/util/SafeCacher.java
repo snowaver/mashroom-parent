@@ -19,11 +19,33 @@ import  java.util.concurrent.Callable;
 import  java.util.concurrent.TimeUnit;
 import  java.util.concurrent.locks.Lock;
 
+import  cc.mashroom.xcache.CacheFactory;
 import  cc.mashroom.xcache.XKeyValueCache;
 import  cc.mashroom.xcache.atomic.XAtomicLong;
 
 public  class     SafeCacher
 {
+	public  static  XAtomicLong  createAndSetIfAbsent(String  name,Callable  <Long>  callable )
+	{
+		XAtomicLong  value = CacheFactory.atomicLong( name,false );
+		
+		try
+		{
+		if( value ==  null )
+			{
+				Long  ival =  callable.call();
+				
+				(value=CacheFactory.atomicLong(name,true)).compareAndSet( 0  , ival == null ? 0 : ival );
+			}
+		}
+		catch(Throwable  e )
+		{
+			throw  new  RuntimeException( e );
+		}
+		
+		return  value;
+	}
+	
 	/**
 	 *  acquire  the  lock,  call  the  callable  and  cache  the  value  if  not  cached,  returns  the  cached  value  and  unlock  the  locker  finally.
 	 */
@@ -33,7 +55,7 @@ public  class     SafeCacher
 		
 		try
 		{
-			if( !locker.tryLock(acquireLockTimeout  ,acquireLockTimeoutTimeUnit) )
+			if( !locker.tryLock(acquireLockTimeout  ,acquireLockTimeoutTimeUnit ) )
 			{
 				throw  new  IllegalStateException( "SQUIRREL-XCACHE:  ** SAFE  CACHER **  the  lock  is  not  acquired  before  the  waiting  time  (2  seconds)  elapsed,  give  up." );
 			}
@@ -42,7 +64,7 @@ public  class     SafeCacher
 		}
 		catch(Throwable  e )
 		{
-			throw  new  RuntimeException(e );
+			throw  new  RuntimeException( e );
 		}
 		finally
 		{
@@ -50,32 +72,5 @@ public  class     SafeCacher
 		}
 		
 		return  value;
-	}
-	
-	public  static  XAtomicLong  compareAndSetQuietly( XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
-	{
-		compareAndSet( atomicLong,expectValue,callable );return  atomicLong;
-	}
-	
-	public  static  boolean  compareAndSet(XAtomicLong  atomicLong,long  expectValue,Callable<Long>  callable )
-	{
-		try
-		{
-			if( atomicLong.get() ==  expectValue )
-			{
-				Long  value= callable.call();
-				
-				if( value != null )
-				{
-					return  atomicLong.compareAndSet( expectValue , value );
-				}
-			}
-		}
-		catch(Throwable  e )
-		{
-			throw  new  RuntimeException(e );
-		}
-		
-		return  false;
 	}
 }

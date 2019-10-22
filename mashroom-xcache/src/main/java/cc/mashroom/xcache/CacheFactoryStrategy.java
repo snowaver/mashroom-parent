@@ -24,13 +24,16 @@ public  interface  CacheFactoryStrategy
 {
 	public  String  getLocalNodeId();
 	/**
-	 *  increment  the  current  value  and  get.  initial  value  is  zero,  but  don't  reset  the  value  if  reset  initialize  value  is  null.
+	 *  get  the  atomic  long  for  the  special  name.
+	 *  @param  name  name  of  the  atomic  long.
+	 *  @param  createIfAbsent  true  to  create  a  new  atomic  long  ( initial  value  is  zero )  for  the  name  if  absent.
+	 *  @return the  atomic  long  for  the  name,  may  be  null  if  the  atomic  long  for  the  name  is  absent  and  parameter  createIfAbsent  is  false.
 	 */
-	public  XAtomicLong  atomicLong( String  name );
+	public  XAtomicLong  atomicLong( String  name,boolean  createIfAbsent );
 	
 	public  <R>  R  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
 	
-	public  List<XClusterNode>    getClusterNodes();
+	public  List<XClusterNode>  getClusterNodes();
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name);
 	

@@ -66,9 +66,9 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		return  Db.tx( "xcache-memtable-datasource", transactionIsolationLevel,callback );
 	}
 	@Override
-	public  XAtomicLong  atomicLong(String name )
+	public  XAtomicLong  atomicLong(      String  name,boolean  createIfAbsent )
 	{
-		return  this.atomicLongs.computeIfAbsent( name,(key) -> new  NativeAtomicLong() );
+		return  !createIfAbsent ? this.atomicLongs.get(name) :this.atomicLongs.computeIfAbsent(name,(key) -> new  NativeAtomicLong() );
 	}
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )

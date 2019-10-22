@@ -22,6 +22,7 @@ import  java.util.stream.Collectors;
 
 import  org.apache.commons.io.IOUtils;
 import  org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteException;
 import  org.apache.ignite.Ignition;
 import  org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import  org.apache.ignite.transactions.Transaction;
@@ -126,9 +127,16 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 		}
 	}
 	@Override
-	public  XAtomicLong  atomicLong( String name)
+	public  XAtomicLong  atomicLong( String  name    ,boolean  createIfAbsent )
 	{
-		return  new  IgniteAtomicLong(    this.ignite.atomicLong(name,0,true));
+		try
+		{
+			return  new  IgniteAtomicLong( ignite.atomicLong(name,0,createIfAbsent) );
+		}
+		catch( IgniteException  error )
+		{
+			return  null;
+		}
 	}
 	
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache(String  name )
