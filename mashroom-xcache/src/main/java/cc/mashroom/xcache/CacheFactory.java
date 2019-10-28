@@ -40,6 +40,11 @@ public  class  CacheFactory
 		return  strategy.getOrCreateKeyValueCache( name );
 	}
 	
+	public  static  String getLocalNodeId()
+	{
+		return  strategy.getLocalNodeId( );
+	}
+	
 	public  static  XMemTableCache              getOrCreateMemTableCache( String  name )
 	{
 		return  strategy.getOrCreateMemTableCache( name );
@@ -47,7 +52,7 @@ public  class  CacheFactory
 	
 	public  static  <T>  T  tx( int  transactionIsolationLevel,  Db.Callback  callback )  throws  Exception
 	{
-		return  strategy.tx(    transactionIsolationLevel, callback );
+		return  strategy.tx(    transactionIsolationLevel,callback );
 	}
 	
 	public  static  <V>  V  call( RemoteCallable <V>  callable,  List<String>   clusterNodeIds )

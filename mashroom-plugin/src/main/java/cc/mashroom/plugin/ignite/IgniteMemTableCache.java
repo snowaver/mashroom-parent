@@ -21,6 +21,7 @@ import  java.util.concurrent.locks.Lock;
 import  org.apache.ignite.cache.query.FieldsQueryCursor;
 import  org.apache.ignite.cache.query.SqlFieldsQuery;
 
+import  cc.mashroom.plugin.ignite.util.RecordUtils;
 import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.Setter;
 import  lombok.SneakyThrows;
