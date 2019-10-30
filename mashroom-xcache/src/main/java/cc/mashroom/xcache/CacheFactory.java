@@ -37,7 +37,7 @@ public  class  CacheFactory
 		return  strategy.getOrCreateKeyValueCache( name );
 	}
 	
-	public  <E>  BlockingQueue <E>  queue( String  name  )
+	public  static  <E>  BlockingQueue <E>  queue( String  name  )
 	{
 		return  strategy.queue( name );
 	}
@@ -59,7 +59,7 @@ public  class  CacheFactory
 	
 	public  static  <T>  T  tx( int  transactionIsolationLevel,  Db.Callback  callback )  throws  Exception
 	{
-		return  strategy.tx(    transactionIsolationLevel,callback );
+		return  strategy.tx( transactionIsolationLevel,callback );
 	}
 	
 	public  static  <V>  V  call( RemoteCallable <V>  callable,  List<String>   clusterNodeIds )
