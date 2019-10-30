@@ -18,12 +18,15 @@ package cc.mashroom.plugin.ignite;
 import  java.net.InetSocketAddress;
 import  java.nio.charset.Charset;
 import  java.util.List;
+import  java.util.concurrent.BlockingQueue;
 import  java.util.stream.Collectors;
 
 import  org.apache.commons.io.IOUtils;
 import  org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteException;
+import  org.apache.ignite.IgniteException;
 import  org.apache.ignite.Ignition;
+import  org.apache.ignite.cache.CacheAtomicityMode;
+import  org.apache.ignite.configuration.CollectionConfiguration;
 import  org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import  org.apache.ignite.transactions.Transaction;
 import  org.apache.ignite.transactions.TransactionConcurrency;
@@ -49,7 +52,7 @@ import  lombok.AccessLevel;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
-public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
+public  class     IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy, Plugin
 {
 	protected  Map<Integer, TransactionIsolation>  transactionIsolationLevels = new  HashMap<Integer,TransactionIsolation>().addEntry(java.sql.Connection.TRANSACTION_READ_COMMITTED,TransactionIsolation.READ_COMMITTED).addEntry(java.sql.Connection.TRANSACTION_REPEATABLE_READ,TransactionIsolation.REPEATABLE_READ).addEntry( java.sql.Connection.TRANSACTION_SERIALIZABLE,TransactionIsolation.SERIALIZABLE );	
 	@Accessors( chain  =true )
@@ -58,17 +61,17 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 	@Accessors( chain  =true )
 	@Setter(value=AccessLevel.PRIVATE )
 	protected  String  script;
-	
+	@Override
 	public  void  stop()
 	{
 		Ignition.stop( false);
 	}
-	
+	@Override
 	public  List<XClusterNode>  getClusterNodes()
 	{
 		return  this.ignite.cluster().forClients().nodes().parallelStream().map((node) -> new  XClusterNode(0,node.id(),node.addresses().stream().filter((address) -> !"127.0.0.1".equals(address) && address.matches("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$")).findFirst().get(),new  HashMap<String,Object>().addEntry("CURRENT_CPU_LOAD",node.metrics().getCurrentCpuLoad()).addEntry("HEAP_MEMORY_MAXIMUM",node.metrics().getHeapMemoryMaximum()).addEntry("HEAP_MEMORY_USED",node.metrics().getHeapMemoryUsed()).addEntry("CURRENT_THREAD_COUNT",node.metrics().getCurrentThreadCount()).addEntry("MAXIMUM_THREAD_COUNT",node.metrics().getMaximumThreadCount()))).collect( Collectors.toList() );
 	}
-	
+	@Override
 	public  String     getLocalNodeId()
 	{
 		return  this.ignite.cluster().localNode().id().toString( );
@@ -90,8 +93,8 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 			throw  new  IllegalStateException( String.format("MASHROOM-PLUGIN:  ** IGNITE  CACHE  FACTORY  STRATEGY **  error  while  adding  a  new  memtable  data  source  ( %s )",dataSourceName),adddtsError );
 		}
 	}
-	
-	public   void  initialize(   Object   ...  parameters )//throws   Throwable
+	@Override
+	public   void  initialize(   Object ...  parameters )
 	{
 		try
 		{
@@ -109,7 +112,7 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 		
 		CacheFactory.setStrategy(this);
 	}
-	
+	@Override
 	public  <T>  T  tx( int  transactionIsolationLevel, Db.Callback  callback )
 	{
 		try( Transaction  transaction = this.ignite.transactions().txStart(TransactionConcurrency.OPTIMISTIC,transactionIsolationLevels.containsKey(transactionIsolationLevel) ? transactionIsolationLevels.get(transactionIsolationLevel ) : TransactionIsolation.READ_COMMITTED) )
@@ -138,19 +141,24 @@ public  class    IgniteCacheFactoryStrategy  implements  CacheFactoryStrategy , 
 			return  null;
 		}
 	}
-	
+	@Override
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache(String  name )
 	{
 		return  new  IgniteKeyValueCache( this.ignite.getOrCreateCache(name) );
 	}
-	
+	@Override
+	public  <V>  V  call( RemoteCallable<V>  callable, List<String>   clusterNodeIds )
+	{
+		return  this.ignite.compute(this.ignite.cluster().forPredicate(  (node) -> clusterNodeIds.contains(node.id().toString()))).call( new  IgniteCallable<V>(callable) );
+	}
+	@Override
 	public  XMemTableCache  getOrCreateMemTableCache(String  name )
 	{
 		return  new  IgniteMemTableCache( this.ignite.getOrCreateCache(name) );
 	}
-	
-	public  <V>  V  call( RemoteCallable<V>  callable, List<String>   clusterNodeIds )
+	@Override
+	public  <E>  BlockingQueue<E>  queue( String   name )
 	{
-		return  this.ignite.compute(this.ignite.cluster().forPredicate(  (node) -> clusterNodeIds.contains(node.id().toString()))).call( new  IgniteCallable<V>(callable) );
+		return  this.ignite.queue( name,0,new  CollectionConfiguration().setBackups(1).setCollocated(false).setAtomicityMode(CacheAtomicityMode.ATOMIC));
 	}
 }

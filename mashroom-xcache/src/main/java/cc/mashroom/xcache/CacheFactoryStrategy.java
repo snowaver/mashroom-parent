@@ -16,9 +16,10 @@
 package cc.mashroom.xcache;
 
 import  java.util.List;
+import  java.util.concurrent.BlockingQueue;
 
 import  cc.mashroom.db.common.Db;
-import cc.mashroom.xcache.atomic.XAtomicLong;
+import  cc.mashroom.xcache.atomic.XAtomicLong;
 
 public  interface  CacheFactoryStrategy
 {
@@ -30,6 +31,8 @@ public  interface  CacheFactoryStrategy
 	 *  @return the  atomic  long  for  the  name,  may  be  null  if  the  atomic  long  for  the  name  is  absent  and  parameter  createIfAbsent  is  false.
 	 */
 	public  XAtomicLong  atomicLong( String  name,boolean  createIfAbsent );
+	
+	public  <E>  BlockingQueue<E>  queue( String  name );
 	
 	public  <R>  R  tx(   int  transactionIsolationLevel,Db.Callback  callback )  throws  Exception;
 	

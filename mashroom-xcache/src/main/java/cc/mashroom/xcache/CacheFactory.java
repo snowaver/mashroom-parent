@@ -16,6 +16,7 @@
 package cc.mashroom.xcache;
 
 import  java.util.List;
+import  java.util.concurrent.BlockingQueue;
 
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.xcache.atomic.XAtomicLong;
@@ -29,15 +30,15 @@ public  class  CacheFactory
 	}
 	@Setter
 	private  static  CacheFactoryStrategy  strategy;
-
-	public  static  XAtomicLong  atomicLong( String  name,boolean  createIfAbsent )
-	{
-		return  strategy.atomicLong(name,createIfAbsent );
-	}
 	
 	public  static  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )
 	{
 		return  strategy.getOrCreateKeyValueCache( name );
+	}
+	
+	public  <E>  BlockingQueue <E>  queue( String  name  )
+	{
+		return  strategy.queue( name );
 	}
 	
 	public  static  String getLocalNodeId()
@@ -45,9 +46,14 @@ public  class  CacheFactory
 		return  strategy.getLocalNodeId( );
 	}
 	
-	public  static  XMemTableCache              getOrCreateMemTableCache( String  name )
+	public  static  XMemTableCache  getOrCreateMemTableCache( String  name )
 	{
 		return  strategy.getOrCreateMemTableCache( name );
+	}
+	
+	public  static  XAtomicLong  atomicLong( String  name,boolean createIfAbsent )
+	{
+		return  strategy.atomicLong(name,createIfAbsent );
 	}
 	
 	public  static  <T>  T  tx( int  transactionIsolationLevel,  Db.Callback  callback )  throws  Exception

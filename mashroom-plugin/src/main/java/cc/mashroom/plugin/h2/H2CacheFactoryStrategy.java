@@ -19,6 +19,8 @@ import  java.lang.management.ManagementFactory;
 import  java.nio.charset.Charset;
 import  java.util.List;
 import  java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import  org.hyperic.sigar.Sigar;
 
@@ -29,6 +31,7 @@ import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
 import  cc.mashroom.util.IOUtils;
+import cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
@@ -52,15 +55,17 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	
 	private  Map<String,H2KeyValueCache>  keyValueCaches = new  ConcurrentHashMap<String,H2KeyValueCache>();
 	
+	private  Map<String,BlockingQueue <?>>      queues = new  ConcurrentHashMap<String, BlockingQueue<?>>();
+	
 	private  Map<String,XAtomicLong >  atomicLongs = new  ConcurrentHashMap<String, XAtomicLong>();
 	
 	private  Map<String,H2MemTableCache>  memTableCaches = new  ConcurrentHashMap<String,H2MemTableCache>();
-	
+	@Override
 	public  <V>  V  call( RemoteCallable<V>  remoteCallable,List<String>  clusterNodeIds )
 	{
 		throw  new  UnsupportedOperationException( "MASHROOM-PLUGIN:  ** H2  CACHE  FACTORY  STRATEGY **  this  operation  is  not  supported  for  single  node  server" );
 	}
-	
+	@Override
 	public  <T>  T  tx( int  transactionIsolationLevel , Db.Callback  callback )  throws  Exception
 	{
 		return  Db.tx( "xcache-memtable-datasource", transactionIsolationLevel,callback );
@@ -68,25 +73,30 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 	@Override
 	public  XAtomicLong  atomicLong(      String  name,boolean  createIfAbsent )
 	{
-		return  !createIfAbsent ? this.atomicLongs.get(name) :this.atomicLongs.computeIfAbsent(name,(key) -> new  NativeAtomicLong() );
+		return  !createIfAbsent ? this.atomicLongs.get(name) :this.atomicLongs.computeIfAbsent(name  , (key) -> new  NativeAtomicLong() );
 	}
-	
+	@Override
 	public  <K,V>  XKeyValueCache<K,V>  getOrCreateKeyValueCache( String  name )
 	{
-		return  keyValueCaches.computeIfLackof(name,new  Map.Computer<String,H2KeyValueCache>(){public  H2KeyValueCache  compute(String  key)  throws  Exception{return  new  H2KeyValueCache<K,V>(key);}});
+		return  this.keyValueCaches.computeIfAbsent( name,(key)-> new  H2KeyValueCache<K,V>(key) );
 	}
-	
+	@Override
 	public  XMemTableCache  getOrCreateMemTableCache(  String  name )
 	{
-		return  memTableCaches.computeIfLackof(name,new  Map.Computer<String,H2MemTableCache>(){public  H2MemTableCache  compute(String  key)  throws  Exception{return  new  H2MemTableCache(key,cacheRepository);}});
+		return  this.memTableCaches.computeIfAbsent( name,(key)-> new  H2MemTableCache(key   , this.cacheRepository) );
 	}
-	
+	@Override
 	public  void  stop()
 	{
-		ConnectionManager.INSTANCE.removeDataSource(       "xcache-memtable-datasource" );
+		ConnectionManager.INSTANCE.removeDataSource( /*DS*/"xcache-memtable-datasource" );
 	}
-	
-	public  void  initialize( Object...  params )
+	@Override
+	public  <E>  BlockingQueue<E>  queue( String  name )
+	{
+		return  ObjectUtils.cast( this.queues.computeIfAbsent(name,(key)-> new  LinkedBlockingQueue<E>()) );
+	}
+	@Override
+	public  void  initialize( Object ...  params )
 	{
 		try
 		{
@@ -105,16 +115,16 @@ public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin
 		CacheFactory.setStrategy(  this );
 	}
 	@SneakyThrows
-	public  List<XClusterNode>  getClusterNodes()
+	public  List<XClusterNode>  getClusterNodes( )
 	{
 		localNode.getMetrics().addEntry("CURRENT_CPU_LOAD",sigar.getCpuPerc().getCombined()).addEntry("HEAP_MEMORY_MAXIMUM",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax()).addEntry("HEAP_MEMORY_USED",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed()).addEntry("CURRENT_THREAD_COUNT",Thread.getAllStackTraces().size()).addEntry( "MAXIMUM_THREAD_COUNT",null );
 		
-		return  Lists.newArrayList(  localNode );
+		return  Lists.newArrayList(   localNode );
 	}
 	
 	public        String  getLocalNodeId()
 	{
-		return this.localNode.getId().toString();
+		return  this.localNode.getId().toString();
 	}
 	/*
 	public  void  stop()
