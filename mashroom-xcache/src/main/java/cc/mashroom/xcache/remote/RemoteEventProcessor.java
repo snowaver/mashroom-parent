@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache;
+package cc.mashroom.xcache.remote;
 
 import  cc.mashroom.util.collection.map.Map;
-import  lombok.AccessLevel;
-import  lombok.NoArgsConstructor;
-import  lombok.Setter;
 
-@NoArgsConstructor( access = AccessLevel.PRIVATE )
-public  class    RemoteEventProcessorDelegate
+public  interface  RemoteEventProcessor
 {
-	@Setter
-	private  RemoteEventProcessor  processor;
-	
-	public  Object  handle( int  eventType,Map<String,Object>  parameters )
-	{
-		return  processor.process( eventType,parameters );
-	}
-	
-	public  final  static  RemoteEventProcessorDelegate  INSTANCE = new  RemoteEventProcessorDelegate();
+	public  <T>  T process( int  eventType,Map<String,Object>  parameters );
 }

@@ -19,8 +19,8 @@ import  java.lang.management.ManagementFactory;
 import  java.nio.charset.Charset;
 import  java.util.List;
 import  java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import  java.util.concurrent.BlockingQueue;
+import  java.util.concurrent.LinkedBlockingQueue;
 
 import  org.hyperic.sigar.Sigar;
 
@@ -30,19 +30,22 @@ import  cc.mashroom.db.ConnectionManager;
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.db.connection.Connection;
 import  cc.mashroom.plugin.Plugin;
+import  cc.mashroom.plugin.h2.xcache.H2KeyValueCache;
+import  cc.mashroom.plugin.h2.xcache.H2MemTableCache;
+import  cc.mashroom.plugin.h2.xcache.H2MemTableCacheRepository;
 import  cc.mashroom.util.IOUtils;
-import cc.mashroom.util.ObjectUtils;
+import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.collection.map.ConcurrentHashMap;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  cc.mashroom.xcache.CacheFactory;
 import  cc.mashroom.xcache.CacheFactoryStrategy;
-import  cc.mashroom.xcache.RemoteCallable;
 import  cc.mashroom.xcache.XClusterNode;
 import  cc.mashroom.xcache.XKeyValueCache;
 import  cc.mashroom.xcache.XMemTableCache;
 import  cc.mashroom.xcache.atomic.NativeAtomicLong;
 import  cc.mashroom.xcache.atomic.XAtomicLong;
+import  cc.mashroom.xcache.remote.RemoteCallable;
 import  lombok.SneakyThrows;
 
 public  class  H2CacheFactoryStrategy  implements  CacheFactoryStrategy , Plugin

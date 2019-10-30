@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.plugin.h2;
+package cc.mashroom.xcache.remote;
 
-import  cc.mashroom.db.GenericRepository;
-import  cc.mashroom.db.annotation.DataSourceBind;
+import  cc.mashroom.util.collection.map.Map;
+import  lombok.AccessLevel;
+import  lombok.NoArgsConstructor;
+import  lombok.Setter;
 
-@DataSourceBind( name="xcache-memtable-datasource",table="*" )
-
-public  class  H2MemTableCacheRepository  extends  GenericRepository
+@NoArgsConstructor( access = AccessLevel.PRIVATE )
+public  class    RemoteEventProcessorDelegate
 {
+	@Setter
+	private  RemoteEventProcessor  processor;
 	
+	public  Object  handle( int  eventType,Map<String,Object>  parameters )
+	{
+		return  processor.process( eventType,parameters );
+	}
+	
+	public  final  static  RemoteEventProcessorDelegate  INSTANCE = new  RemoteEventProcessorDelegate();
 }

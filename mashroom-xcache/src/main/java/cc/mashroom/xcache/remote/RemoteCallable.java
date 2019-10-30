@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache;
+package cc.mashroom.xcache.remote;
+
+import  java.util.concurrent.Callable;
 
 import  cc.mashroom.util.collection.map.Map;
-@Deprecated
-public  interface  SerializableStrategy<S>
+import  lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public  class  RemoteCallable<V>  implements  Callable<V>
 {
-	public  Map<String,Object>  read( S  serializedObject );
+	private  int  eventType;
+	
+	private  Map<String,Object>  parameters;
+	
+	public  V  call()  throws  Exception
+	{
+		return  (V)  RemoteEventProcessorDelegate.INSTANCE.handle( eventType,parameters );
+	}
 }

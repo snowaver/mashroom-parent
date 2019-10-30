@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.plugin.ignite;
+package cc.mashroom.plugin.h2.xcache;
 
-import  cc.mashroom.xcache.RemoteCallable;
-import  lombok.AllArgsConstructor;
+import  cc.mashroom.db.GenericRepository;
+import  cc.mashroom.db.annotation.DataSourceBind;
 
-@AllArgsConstructor
-public  class  IgniteCallable<V>  implements  org.apache.ignite.lang.IgniteCallable<V>
+@DataSourceBind( name="xcache-memtable-datasource",table="*" )
+
+public  class  H2MemTableCacheRepository  extends  GenericRepository
 {
-	private  RemoteCallable<V>  callable;
 	
-	public  V  call()   throws  Exception
-	{
-		return  callable.call();
-	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.plugin.ignite;
+package cc.mashroom.plugin.ignite.xcache;
 
 import  java.util.List;
 import  java.util.concurrent.locks.Lock;

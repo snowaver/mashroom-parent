@@ -20,6 +20,7 @@ import  java.util.concurrent.BlockingQueue;
 
 import  cc.mashroom.db.common.Db;
 import  cc.mashroom.xcache.atomic.XAtomicLong;
+import  cc.mashroom.xcache.remote.RemoteCallable;
 
 public  interface  CacheFactoryStrategy
 {

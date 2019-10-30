@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.xcache;
+package cc.mashroom.plugin.ignite.remote;
 
-import  cc.mashroom.util.collection.map.Map;
+import  cc.mashroom.xcache.remote.RemoteCallable;
+import  lombok.AllArgsConstructor;
 
-public  interface  RemoteEventProcessor
+@AllArgsConstructor
+public  class  IgniteCallable<V>  implements  org.apache.ignite.lang.IgniteCallable<V>
 {
-	public  <T>  T process( int  eventType,Map<String,Object>  parameters );
+	private  RemoteCallable<V>  callable;
+	
+	public  V  call()   throws  Exception
+	{
+		return  callable.call();
+	}
 }

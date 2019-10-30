@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cc.mashroom.plugin.h2;
+package cc.mashroom.plugin.h2.xcache;
 
 import  java.util.List;
 
@@ -21,7 +21,7 @@ import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.xcache.XMemTableCache;
 import  lombok.NoArgsConstructor;
 import  lombok.Setter;
-import lombok.experimental.Accessors;
+import  lombok.experimental.Accessors;
 
 @NoArgsConstructor
 
