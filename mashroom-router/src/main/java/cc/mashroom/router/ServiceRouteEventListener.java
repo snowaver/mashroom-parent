@@ -15,12 +15,13 @@
  */
 package cc.mashroom.router;
 
-import  lombok.AccessLevel;
-import  lombok.NoArgsConstructor;
+import  java.util.List;
 
-@NoArgsConstructor( access=AccessLevel.PRIVATE )
-
-public  class  ServiceRouteAdapter
+public  interface  ServiceRouteEventListener
 {
+	public  void  onBeforeRequest();
 	
+	public  void  onRequestComplete( List<Service>  services );
+	
+	public  void  onChanged( Service  oldService,Service  newService );
 }

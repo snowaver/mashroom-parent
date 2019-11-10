@@ -16,132 +16,80 @@
 package cc.mashroom.router;
 
 import  java.util.ArrayList;
-import  java.util.Collection;
 import  java.util.List;
-import  java.util.concurrent.CopyOnWriteArrayList;
 
 import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import  org.apache.commons.lang3.RandomUtils;
 
-import  cc.mashroom.util.CollectionUtils;
+import  com.fasterxml.jackson.core.type.TypeReference;
+
+import  cc.mashroom.router.Service.Schema;
+import  cc.mashroom.util.ObjectUtils;
 import  cc.mashroom.util.collection.map.HashMap;
 import  cc.mashroom.util.collection.map.Map;
 import  lombok.Getter;
+import  lombok.NonNull;
+import  lombok.RequiredArgsConstructor;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
 
+@RequiredArgsConstructor
 public  class  ServiceRouteManager
 {
-	public  ServiceRouteManager(ServiceListRequestStrategy strategy )
-	{
-		this.strategy  = strategy;
-	}
-	
-	@Accessors( chain=true )
+	@Getter
+	private  ServiceRouteEventDispatcher  serviceRouteEventDispatcher    = new  ServiceRouteEventDispatcher();
+	@Accessors( chain = true )
 	@Setter
+	@NonNull
 	private  ServiceListRequestStrategy   strategy;
+	@Getter
+	private  boolean  isRequested         =  false;
 	
-	private  List<ServiceRouteListener>   listeners       = new  CopyOnWriteArrayList<ServiceRouteListener>();
-	
-	private  Map<Long,Service>  ids   = new  HashMap<Long,Service>();
+	private  Map<Schema, Service> currents= new  HashMap<Schema, Service>();
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
-	private  Map<Schema , Service>   currents = new  HashMap<Schema,Service>();
-	@Getter
-	private  boolean  isRequested= false;
-	
-	public  void  addListener(       ServiceRouteListener  listener )
+	public  synchronized  ArrayListValuedHashMap<Schema, Service>  request()
 	{
-		CollectionUtils.addIfAbsent( this.listeners,listener);
-	}
-	
-	public  void  removeListener(    ServiceRouteListener  listener )
-	{
-		CollectionUtils.remove(      this.listeners,listener);
-	}
-	
-	public   List<Service>  getServices()
-	{
-		return  new  ArrayList<Service>(    this.services.values() );
-	}
-	
-	public  Service  current(      Schema  schema )
-	{
-		return  currents.get(   schema );
-	}
-	
-	public  void     clear()
-	{
-		services.clear();
+		if( this.isRequested )    return  services;
 		
-		this.ids.clear();
+		this.serviceRouteEventDispatcher.onBeforeRequest();
 		
-		currents.clear();
-	}
-	
-	public  synchronized  void  request()
-	{
-//		if( !  isRequested )
+		ArrayListValuedHashMap<Schema,Service>  requestedServices = strategy.request();
+		
+		if( this.isRequested=!requestedServices.isEmpty() )
 		{
-			try
-			{
-				for( ServiceRouteListener  listener :this.listeners )  listener.onBeforeRequest();
-			}
-			catch( Throwable  th )   { th.printStackTrace(); }
-			
-			List<Service>  services = this.strategy.request();
-			
-			try
-			{
-				for( ServiceRouteListener  listener :this.listeners )   listener.onRequestComplete( services );
-			}
-			catch( Throwable  th )   { th.printStackTrace(); }
-			
-			if( !    services.isEmpty() )
-			{
-				clear( );
-				
-				add(   services );
-				
-				this.isRequested =  true;
-			}
-		}
-	}
-	
-	public  void  add(     Collection<Service>   newServices )
-	{
-		for(    Service  newService : newServices )
-		{
-			Service  oldService   = ids.remove( newService.getId() );
-			
-			if(      oldService != null )
-			{
-				this.services.removeMapping( Schema.valueOf(oldService.getSchema().toUpperCase()),oldService );
-			}
-			this.ids.put(     newService.getId(),newService );
-			
-			this.services.put( Schema.valueOf(newService.getSchema().toUpperCase()),newService  );
-		}
-	}
-	
-	public   Service  tryNext(     Schema  schema )
-	{
-		List<Service>  pendingServices = this.services.get( schema );
-		
-		Service  currentService = this.currents.get( schema );
-		
-		Service  nextService = pendingServices.isEmpty() ? null : pendingServices.get( currentService == null ? RandomUtils.nextInt(0,pendingServices.size()) : (pendingServices.indexOf(currentService) == pendingServices.size()-1 ? 0 : pendingServices.indexOf(currentService)+1) );
-		
-		this.currents.put(  schema ,  nextService);
-		{
-			try
-			{
-				for( ServiceRouteListener  listener :this.listeners )  listener.onChanged( currentService , nextService );
-			}
-			catch( Throwable  th )   { th.printStackTrace(); }
+		this.services.clear();    this.services.putAll( requestedServices );
 		}
 		
-		return  nextService;
+		this.serviceRouteEventDispatcher.onRequestComplete( ObjectUtils.cast(this.services.values(),new  TypeReference<ArrayList<Service>>(){}) );  return  requestedServices;
+	}
+	
+	public  void  reset()
+	{
+		this.services.clear();
+		
+		this.currents.clear();this.isRequested    =  false;
+	}
+	
+	public  Service  current( Schema  schema )
+	{
+		return  this.currents.get(    schema);
+	}
+	
+	public  List<Service>  getServices()
+	{
+		return  new  ArrayList<Service>(services.values());
+	}
+	
+	public  Service  tryNext( Schema  schema )
+	{
+		List<Service>  services = new  ArrayList<Service>( this.services.get(schema) );
+		
+		Service  currentService = this.current(   schema );
+		
+		Service  nextService = services.isEmpty() ? null : services.get( currentService == null ? RandomUtils.nextInt(0,services.size()) : (services.indexOf(currentService) == services.size()-1 ? 0 : services.indexOf(currentService)+1) );
+		
+		serviceRouteEventDispatcher.onChanged( currentService,nextService );  return  nextService;
 	}
 }

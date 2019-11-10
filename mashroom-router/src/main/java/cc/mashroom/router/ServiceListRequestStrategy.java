@@ -15,9 +15,11 @@
  */
 package cc.mashroom.router;
 
-import  java.util.List;
+import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+
+import  cc.mashroom.router.Service.Schema;
 
 public  interface  ServiceListRequestStrategy
 {
-	public  List<Service>  request();
+	public  ArrayListValuedHashMap<Schema,Service>  request();
 }

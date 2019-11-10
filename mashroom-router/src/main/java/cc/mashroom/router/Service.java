@@ -34,6 +34,15 @@ public  class  Service
 	private  String   host;
 	@JsonProperty( "PORT" )
 	private  Integer  port;
-	@JsonProperty( "SCHEMA" )
+	@JsonProperty( "SCHEMA"   )
 	private  String schema;
+	
+	public  enum   Schema
+	{
+		TCP,UDP,HTTP,HTTPS,FTP;
+	}
+	public  Schema  getSchema()
+	{
+		return  Schema.valueOf( this.schema.toUpperCase() );
+	}
 }

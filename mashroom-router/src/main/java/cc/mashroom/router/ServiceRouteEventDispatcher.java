@@ -17,11 +17,22 @@ package cc.mashroom.router;
 
 import  java.util.List;
 
-public  interface  ServiceRouteListener
+import  cc.mashroom.util.event.EventDispather;
+
+public  class  ServiceRouteEventDispatcher  extends  EventDispather  <ServiceRouteEventListener>
 {
-	public  void  onBeforeRequest();
+	public  void  onBeforeRequest()
+	{
+		for( ServiceRouteEventListener  listener : this.listeners )  listener.onBeforeRequest();
+	}
 	
-	public  void  onRequestComplete( List<Service>  services );
+	public  void  onChanged( Service  oldService,Service  newService )
+	{
+		for( ServiceRouteEventListener  listener : this.listeners )  listener.onChanged( oldService , newService );
+	}
 	
-	public  void  onChanged( Service  oldService,Service  newService );
+	public  void  onRequestComplete( List<Service>  services )
+	{
+		for( ServiceRouteEventListener  listener : this.listeners )  listener.onRequestComplete( services );
+	}
 }
