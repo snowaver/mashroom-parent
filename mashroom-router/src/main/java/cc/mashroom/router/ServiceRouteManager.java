@@ -43,9 +43,9 @@ public  class  ServiceRouteManager
 	@NonNull
 	private  ServiceListRequestStrategy   strategy;
 	@Getter
-	private  boolean  isRequested         =  false;
+	private  boolean   isRequested        =  false;
 	
-	private  Map<Schema, Service> currents= new  HashMap<Schema, Service>();
+	private  Map<Schema , Service>currents= new  HashMap<Schema, Service>();
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
