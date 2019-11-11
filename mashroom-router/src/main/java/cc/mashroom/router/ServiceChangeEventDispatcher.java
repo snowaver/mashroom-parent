@@ -15,13 +15,12 @@
  */
 package cc.mashroom.router;
 
-import  java.util.List;
+import  cc.mashroom.util.event.EventDispather;
 
-public  interface  ServiceRouteEventListener
+public  class  ServiceChangeEventDispatcher   extends  EventDispather<ServiceChangeEventListener>
 {
-	public  void  onBeforeRequest();
-	
-	public  void  onRequestComplete( List<Service>  services );
-	
-	public  void  onChanged( Service  oldService,Service  newService );
+	public  void  onChanged(Service  oldService,Service  newService )
+	{
+		for( ServiceChangeEventListener  listener  : this.listeners )  listener.onChange( oldService,newService );
+	}
 }

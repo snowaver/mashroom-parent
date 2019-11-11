@@ -34,7 +34,7 @@ import  lombok.experimental.Accessors;
 import  okhttp3.OkHttpClient;
 
 @AllArgsConstructor
-public  class      DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
+public  class     DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
 	@Setter( value= AccessLevel.PROTECTED )
 	@Accessors( chain= true )
@@ -49,25 +49,16 @@ public  class      DefaultServiceListRequestStrategy  implements  ServiceListReq
 	@Accessors( chain= true )
 	private  TimeUnit  timeoutTimeUnit;
 	@SneakyThrows
-	public  ArrayListValuedHashMap<Schema , Service>  request( )
+	public  ArrayListValuedHashMap<Schema ,Service>  request( )
 	{
-		ThreadPoolExecutor  requestAwaitPool = new  ThreadPoolExecutor( this.urls.size(),this.urls.size(),60,TimeUnit.SECONDS,new  LinkedBlockingQueue<Runnable>() );
+		ThreadPoolExecutor  rqPool = new  ThreadPoolExecutor( this.urls.size(),this.urls.size(),60,TimeUnit.SECONDS,new  LinkedBlockingQueue<Runnable>() );
 		
-		try
-		{
-			ArrayListValuedHashMap<Schema , Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
-			
-			CountDownLatch  ctdlatch = new  CountDownLatch( 1 );
-			
-			for(  String  url : this.urls )  requestAwaitPool.submit( new  ServiceListRequester(services,ctdlatch,this.okHttpClient,url) );
-			
-			ctdlatch.await( this.timeout,this.timeoutTimeUnit );
-			
-			return  services;
-		}
-		finally
-		{
-			requestAwaitPool.shutdownNow();
-		}
+		ArrayListValuedHashMap<Schema , Service>  requestedServices =  new  ArrayListValuedHashMap<Schema,Service>();
+		
+		CountDownLatch  ctdlatch = new  CountDownLatch(    1 );
+		
+		for(String url :urls)  rqPool.submit( new  ServiceListRequester(requestedServices,ctdlatch,this.okHttpClient,url) );  ctdlatch.await( this.timeout,this.timeoutTimeUnit );
+		
+		rqPool.shutdownNow();  return  requestedServices;
 	}
 }

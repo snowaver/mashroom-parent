@@ -22,6 +22,7 @@ import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import  org.apache.commons.lang3.RandomUtils;
 
 import  com.fasterxml.jackson.core.type.TypeReference;
+import  com.google.common.collect.Lists;
 
 import  cc.mashroom.router.Service.Schema;
 import  cc.mashroom.util.ObjectUtils;
@@ -37,59 +38,56 @@ import  lombok.experimental.Accessors;
 public  class  ServiceRouteManager
 {
 	@Getter
-	private  ServiceRouteEventDispatcher  serviceRouteEventDispatcher    = new  ServiceRouteEventDispatcher();
-	@Accessors( chain = true )
-	@Setter
-	@NonNull
-	private  ServiceListRequestStrategy   strategy;
-	@Getter
-	private  boolean   isRequested        =  false;
-	
-	private  Map<Schema , Service>currents= new  HashMap<Schema, Service>();
+	private  ServiceListRequestEventDispatcher  serviceListRequestEventDispatcher = new  ServiceListRequestEventDispatcher();
 	
 	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
 	
-	public  synchronized  ArrayListValuedHashMap<Schema, Service>  request()
-	{
-		if( this.isRequested )    return  services;
-		
-		this.serviceRouteEventDispatcher.onBeforeRequest();
-		
-		ArrayListValuedHashMap<Schema,Service>  requestedServices = strategy.request();
-		
-		if( this.isRequested=!requestedServices.isEmpty() )
-		{
-		this.services.clear();    this.services.putAll( requestedServices );
-		}
-		
-		this.serviceRouteEventDispatcher.onRequestComplete( ObjectUtils.cast(this.services.values(),new  TypeReference<ArrayList<Service>>(){}) );  return  requestedServices;
-	}
-	
-	public  void  reset()
-	{
-		this.services.clear();
-		
-		this.currents.clear();this.isRequested    =  false;
-	}
-	
-	public  Service  current( Schema  schema )
-	{
-		return  this.currents.get(    schema);
-	}
-	
-	public  List<Service>  getServices()
-	{
-		return  new  ArrayList<Service>(services.values());
-	}
+	private  Map<Schema,Service>  currents=new   HashMap<Schema, Service>();
+	@Getter
+	private  boolean isRequested=false;
+	@Accessors( chain = true )
+	@Setter
+	@NonNull
+	private  ServiceListRequestStrategy          serviceListRequestStrategy;
+	@Getter
+	private  ServiceChangeEventDispatcher  serviceChangeEventDispatcher = new  ServiceChangeEventDispatcher();
 	
 	public  Service  tryNext( Schema  schema )
 	{
 		List<Service>  services = new  ArrayList<Service>( this.services.get(schema) );
 		
-		Service  currentService = this.current(   schema );
+		Service  currentService = this.current(schema );
 		
 		Service  nextService = services.isEmpty() ? null : services.get( currentService == null ? RandomUtils.nextInt(0,services.size()) : (services.indexOf(currentService) == services.size()-1 ? 0 : services.indexOf(currentService)+1) );
 		
-		serviceRouteEventDispatcher.onChanged( currentService,nextService );  return  nextService;
+		serviceChangeEventDispatcher.onChanged(currentService,nextService );  return  nextService;
+	}
+	
+	public  Service  current( Schema  schema )
+	{
+		return  currents.get( schema );
+	}
+	
+	public  List<Service> getServices()
+	{
+		return  Lists.newArrayList( services.values() );
+	}
+	
+	public  synchronized  ArrayListValuedHashMap<Schema, Service>  request()
+	{
+		if( isRequested )
+		{
+			throw  new  IllegalStateException( "MASHROOM-ROUTER:  ** SERVICE  ROUTE  MANAGER **  the  service  list  is  requested  already." );
+		}
+		
+		this.serviceListRequestEventDispatcher.onBeforeRequest();
+		
+		ArrayListValuedHashMap<Schema,Service>  requestedServices = this.serviceListRequestStrategy.request();
+		
+		this.isRequested = !requestedServices.isEmpty();
+		
+		this.services.clear();  this.services.putAll(   requestedServices );
+		
+		this.serviceListRequestEventDispatcher.onRequestComplete( ObjectUtils.cast(this.services.values(), new  TypeReference<ArrayList<Service>>(){}) );  return  services;
 	}
 }

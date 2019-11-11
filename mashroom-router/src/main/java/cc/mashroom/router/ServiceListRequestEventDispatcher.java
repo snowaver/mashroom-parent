@@ -19,20 +19,15 @@ import  java.util.List;
 
 import  cc.mashroom.util.event.EventDispather;
 
-public  class  ServiceRouteEventDispatcher  extends  EventDispather  <ServiceRouteEventListener>
+public  class  ServiceListRequestEventDispatcher  extends  EventDispather<ServiceListRequestEventListener>
 {
 	public  void  onBeforeRequest()
 	{
-		for( ServiceRouteEventListener  listener : this.listeners )  listener.onBeforeRequest();
-	}
-	
-	public  void  onChanged( Service  oldService,Service  newService )
-	{
-		for( ServiceRouteEventListener  listener : this.listeners )  listener.onChanged( oldService , newService );
+		for( ServiceListRequestEventListener  listener : this.listeners )  listener.onBeforeRequest();
 	}
 	
 	public  void  onRequestComplete( List<Service>  services )
 	{
-		for( ServiceRouteEventListener  listener : this.listeners )  listener.onRequestComplete( services );
+		for( ServiceListRequestEventListener  listener : this.listeners )  listener.onRequestComplete( services );
 	}
 }
