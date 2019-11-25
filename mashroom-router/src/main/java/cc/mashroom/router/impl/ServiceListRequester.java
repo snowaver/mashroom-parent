@@ -15,15 +15,12 @@
  */
 package cc.mashroom.router.impl;
 
+import  java.io.IOException;
 import  java.util.List;
-import  java.util.concurrent.CountDownLatch;
-
-import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
 import  com.fasterxml.jackson.core.type.TypeReference;
 
 import  cc.mashroom.router.Service;
-import  cc.mashroom.router.Service.Schema;
 import  cc.mashroom.util.JsonUtils;
 import  cc.mashroom.util.ObjectUtils;
 import  lombok.AccessLevel;
@@ -36,32 +33,17 @@ import  okhttp3.Request;
 import  okhttp3.Response;
 
 @AllArgsConstructor
-public  class  ServiceListRequester  implements  Runnable
+public  class  ServiceListRequester//  implements  Runnable
 {
-	private  ArrayListValuedHashMap<Schema,Service>  services;
-	private  CountDownLatch     ctdlatch;
-	@Setter(value=AccessLevel.PROTECTED )
-	@Accessors(chain=true )
-	private  OkHttpClient   okHttpClient;
-	@Setter(value=AccessLevel.PROTECTED )
-	@Accessors(chain=true )
-	private  String  url;
-	@Override
-	@SneakyThrows
-	public   void   run()
+	@Setter( value=  AccessLevel.PROTECTED )
+	@Accessors( chain=true )
+	private  OkHttpClient  okHttpClient;
+	@SneakyThrows( value=IOException.class )
+	public  List<Service>  request( String  url )
 	{
-		try( Response  response =  this.okHttpClient.newCall( new  Request.Builder().url(this.url).build()).execute() )
+		try( Response  response =  this.okHttpClient.newCall( new  Request.Builder().url(url).build()).execute() )
 		{
-			if( 200 ==  response.code() )
-			{
-				synchronized(  services )
-				{
-				if( services.isEmpty( ) )
-				{
-					for( Service  service : ObjectUtils.cast(JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)),new  TypeReference<List<Service>>(){}) )  this.services.put( service.getSchema(),service );  this.ctdlatch.countDown();
-				}
-				}
-			}
+			return  response.code() != 200 ? null : ObjectUtils.cast( JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)),new  TypeReference<List<Service>>(){} );
 		}
 	}
 }

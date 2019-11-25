@@ -16,49 +16,30 @@
 package cc.mashroom.router.impl;
 
 import  java.util.Collection;
-import  java.util.concurrent.CountDownLatch;
-import  java.util.concurrent.LinkedBlockingQueue;
-import  java.util.concurrent.ThreadPoolExecutor;
-import  java.util.concurrent.TimeUnit;
-
-import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import  java.util.List;
 
 import  cc.mashroom.router.Service;
 import  cc.mashroom.router.ServiceListRequestStrategy;
-import  cc.mashroom.router.Service.Schema;
-import  lombok.AccessLevel;
 import  lombok.AllArgsConstructor;
-import  lombok.Setter;
 import  lombok.SneakyThrows;
-import  lombok.experimental.Accessors;
 import  okhttp3.OkHttpClient;
 
 @AllArgsConstructor
 public  class     DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
-	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
-	private  OkHttpClient okHttpClient;
-	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
-	private  Collection <String>  urls;
-	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
-	private  long  timeout;
-	@Setter( value= AccessLevel.PROTECTED )
-	@Accessors( chain= true )
-	private  TimeUnit  timeoutTimeUnit;
+	private  OkHttpClient  okHttpClient;
+	
+	private  Collection  <String>  urls;
 	@SneakyThrows
-	public  ArrayListValuedHashMap<Schema ,Service>  request( )
+	public   List  <Service>   request()
 	{
-		ThreadPoolExecutor  rqPool = new  ThreadPoolExecutor( this.urls.size(),this.urls.size(),60,TimeUnit.SECONDS,new  LinkedBlockingQueue<Runnable>() );
+		ServiceListRequester   requester  = new  ServiceListRequester( this.okHttpClient );
 		
-		ArrayListValuedHashMap<Schema , Service>  requestedServices =  new  ArrayListValuedHashMap<Schema,Service>();
+		for( String   url  : this.urls )
+		{
+			List<Service>  services = requester.request( url );  if( services != null && !services.isEmpty() )  return  services;
+		}
 		
-		CountDownLatch  ctdlatch = new  CountDownLatch(    1 );
-		
-		for(String url :urls)  rqPool.submit( new  ServiceListRequester(requestedServices,ctdlatch,this.okHttpClient,url) );  ctdlatch.await( this.timeout,this.timeoutTimeUnit );
-		
-		rqPool.shutdownNow();  return  requestedServices;
+		return  null;
 	}
 }

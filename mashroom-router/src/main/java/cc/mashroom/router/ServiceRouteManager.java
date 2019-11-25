@@ -18,18 +18,9 @@ package cc.mashroom.router;
 import  java.util.ArrayList;
 import  java.util.List;
 
-import  org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import  org.apache.commons.lang3.RandomUtils;
 
-import  com.fasterxml.jackson.core.type.TypeReference;
-import  com.google.common.collect.Lists;
-
-import  cc.mashroom.router.Service.Schema;
-import  cc.mashroom.util.ObjectUtils;
-import  cc.mashroom.util.collection.map.HashMap;
-import  cc.mashroom.util.collection.map.Map;
 import  lombok.Getter;
-import  lombok.NonNull;
 import  lombok.RequiredArgsConstructor;
 import  lombok.Setter;
 import  lombok.experimental.Accessors;
@@ -38,56 +29,44 @@ import  lombok.experimental.Accessors;
 public  class  ServiceRouteManager
 {
 	@Getter
-	private  ServiceListRequestEventDispatcher  serviceListRequestEventDispatcher = new  ServiceListRequestEventDispatcher();
-	
-	private  ArrayListValuedHashMap<Schema,Service>  services = new  ArrayListValuedHashMap<Schema,Service>();
-	
-	private  Map<Schema,Service>  currents=new   HashMap<Schema, Service>();
-	@Getter
-	private  boolean isRequested=false;
+	private  ServiceChangeEventDispatcher  serviceChangeEventDispatcher= new  ServiceChangeEventDispatcher();
 	@Accessors( chain = true )
 	@Setter
-	@NonNull
-	private  ServiceListRequestStrategy          serviceListRequestStrategy;
+	private  ServiceListRequestStrategy    strategy;
+	private  int  currentServiceIndex=-1;
+	private  List<Service>  services= new  ArrayList<Service>();
 	@Getter
-	private  ServiceChangeEventDispatcher  serviceChangeEventDispatcher = new  ServiceChangeEventDispatcher();
+	private  ServiceListRequestEventDispatcher   serviceListRequestEventDispatcher= new  ServiceListRequestEventDispatcher();
 	
-	public  Service  tryNext( Schema  schema )
+	public   synchronized   List<Service>  request()
 	{
-		List<Service>  services = new  ArrayList<Service>( this.services.get(schema) );
-		
-		Service  currentService = this.current(schema );
-		
-		Service  nextService = services.isEmpty() ? null : services.get( currentService == null ? RandomUtils.nextInt(0,services.size()) : (services.indexOf(currentService) == services.size()-1 ? 0 : services.indexOf(currentService)+1) );
-		
-		serviceChangeEventDispatcher.onChanged(currentService,nextService );  return  nextService;
-	}
-	
-	public  Service  current( Schema  schema )
-	{
-		return  currents.get( schema );
-	}
-	
-	public  List<Service> getServices()
-	{
-		return  Lists.newArrayList( services.values() );
-	}
-	
-	public  synchronized  ArrayListValuedHashMap<Schema, Service>  request()
-	{
-		if( isRequested )
+		synchronized  ( this )
 		{
-			throw  new  IllegalStateException( "MASHROOM-ROUTER:  ** SERVICE  ROUTE  MANAGER **  the  service  list  is  requested  already." );
+			serviceListRequestEventDispatcher.onBeforeRequest();
+			
+			List<Service>  services =   this.strategy.request();
+			
+		this.services.clear();  this.services.addAll( services);
+			
+			serviceListRequestEventDispatcher.onRequestComplete( services );
+			
+		return  this.services;
 		}
-		
-		this.serviceListRequestEventDispatcher.onBeforeRequest();
-		
-		ArrayListValuedHashMap<Schema,Service>  requestedServices = this.serviceListRequestStrategy.request();
-		
-		this.isRequested = !requestedServices.isEmpty();
-		
-		this.services.clear();  this.services.putAll(   requestedServices );
-		
-		this.serviceListRequestEventDispatcher.onRequestComplete( ObjectUtils.cast(this.services.values(), new  TypeReference<ArrayList<Service>>(){}) );  return  services;
+	}
+	
+	public  Service  service()
+	{
+		synchronized  ( this )
+		{
+			return  this.services.get(this.currentServiceIndex);
+		}
+	}
+	
+	public  Service  tryNext()
+	{
+		synchronized  ( this )
+		{
+			return  this.services.get( this.currentServiceIndex= this.currentServiceIndex < 0 ? RandomUtils.nextInt(0, this.services.size()) : (this.currentServiceIndex == this.services.size()-1 ? 0 : this.currentServiceIndex+1) );
+		}
 	}
 }
