@@ -15,29 +15,31 @@
  */
 package cc.mashroom.router.impl;
 
+import  java.util.ArrayList;
 import  java.util.Collection;
 import  java.util.List;
 
 import  cc.mashroom.router.Service;
 import  cc.mashroom.router.ServiceListRequestStrategy;
 import  lombok.AllArgsConstructor;
-import  lombok.SneakyThrows;
 import  okhttp3.OkHttpClient;
 
 @AllArgsConstructor
-public  class     DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
+public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequestStrategy
 {
 	private  OkHttpClient  okHttpClient;
 	
-	private  Collection  <String>  urls;
-	@SneakyThrows
+	private  Collection    <String>urls;
+	
+	private  List  <Service>   backupServices  =  new  ArrayList<Service>();
+	
 	public   List  <Service>   request()
 	{
-		ServiceListRequester   requester  = new  ServiceListRequester( this.okHttpClient );
+		ServiceListRequester   requester   = new  ServiceListRequester(  okHttpClient );
 		
 		for( String   url  : this.urls )
 		{
-			List<Service>  services = requester.request( url );  if( services != null && !services.isEmpty() )  return  services;
+			List<Service>  services = requester.request( url );  return  services!= null && !services.isEmpty() ? this.backupServices : services;
 		}
 		
 		return  null;

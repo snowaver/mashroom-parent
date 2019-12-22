@@ -66,7 +66,7 @@ public  class  ServiceRouteManager
 	{
 		synchronized  ( this )
 		{
-			return  this.services.get( this.currentServiceIndex= this.currentServiceIndex < 0 ? RandomUtils.nextInt(0, this.services.size()) : (this.currentServiceIndex == this.services.size()-1 ? 0 : this.currentServiceIndex+1) );
+			this.serviceChangeEventDispatcher.onChanged( this.currentServiceIndex == -1 ? null : this.services.get(this.currentServiceIndex),this.services.get(this.currentServiceIndex = this.currentServiceIndex < 0 ? RandomUtils.nextInt(0, this.services.size()) : (this.currentServiceIndex == this.services.size()-1 ? 0 : this.currentServiceIndex+1)) );  return  service();
 		}
 	}
 }
