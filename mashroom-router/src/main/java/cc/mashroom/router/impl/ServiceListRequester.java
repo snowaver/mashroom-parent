@@ -26,7 +26,6 @@ import  cc.mashroom.util.ObjectUtils;
 import  lombok.AccessLevel;
 import  lombok.AllArgsConstructor;
 import  lombok.Setter;
-import  lombok.SneakyThrows;
 import  lombok.experimental.Accessors;
 import  okhttp3.OkHttpClient;
 import  okhttp3.Request;
@@ -36,14 +35,18 @@ import  okhttp3.Response;
 public  class  ServiceListRequester//  implements  Runnable
 {
 	@Setter( value=  AccessLevel.PROTECTED )
-	@Accessors( chain=true )
+	@Accessors( chain  = true )
 	private  OkHttpClient  okHttpClient;
-	@SneakyThrows( value=IOException.class )
-	public  List<Service>  request( String  url )
+	public  List<Service>  request( String  url )  throws  IOException
 	{
 		try( Response  response =  this.okHttpClient.newCall( new  Request.Builder().url(url).build()).execute() )
 		{
-			return  response.code() != 200 ? null : ObjectUtils.cast( JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)),new  TypeReference<List<Service>>(){} );
+			if( response.code() == 200 )
+			{
+				return  ObjectUtils.cast( JsonUtils.mapper.readValue(response.body().string(),JsonUtils.mapper.getTypeFactory().constructParametricType(List.class,Service.class)),new  TypeReference<List<Service>>(){} );
+			}
+			
+			throw  new  IllegalStateException( String.format("MASHROOM-ROUTER:  ** SERVICE  LIST  REQUEST ** can  not  request  the  service  list  for  response  code  (%d).",response.code()) );
 		}
 	}
 }

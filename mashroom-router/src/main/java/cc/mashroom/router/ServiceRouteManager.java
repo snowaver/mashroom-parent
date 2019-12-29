@@ -58,7 +58,7 @@ public  class  ServiceRouteManager
 	{
 		synchronized  ( this )
 		{
-			return  this.services.get(this.currentServiceIndex);
+			return  this.currentServiceIndex < 0 ? null : this.services.get(      this.currentServiceIndex );
 		}
 	}
 	

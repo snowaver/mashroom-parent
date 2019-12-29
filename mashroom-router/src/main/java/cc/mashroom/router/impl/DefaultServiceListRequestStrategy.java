@@ -39,9 +39,16 @@ public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequest
 		
 		for( String   url  : this.urls )
 		{
-			List<Service>  services = requester.request( url );  return  services!= null && !services.isEmpty() ? this.backupServices : services;
+			try
+			{
+				return  requester.request( url);
+			}
+			catch(Throwable  e )
+			{
+			e.printStackTrace();
+			}
 		}
 		
-		return  null;
+		System.err.println( "MASHROOM-ROUTER:  ** DEFAULT  SERVICE  LIST  REQUEST  STRATEGY **  no  service  is  available,  use  backup  service  list  instead." );  return  backupServices;
 	}
 }
