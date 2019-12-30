@@ -46,9 +46,11 @@ public  class  ServiceRouteManager
 			
 			List<Service>  services =   this.strategy.request();
 			
+		if( services != null )
+			{
 		this.services.clear();  this.services.addAll( services);
-			
-			serviceListRequestEventDispatcher.onRequestComplete( services );
+			}
+			this.serviceListRequestEventDispatcher.onRequestComplete(services == null ? 503 : 200,services );
 			
 		return  this.services;
 		}

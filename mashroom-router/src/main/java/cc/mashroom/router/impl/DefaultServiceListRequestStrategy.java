@@ -15,7 +15,6 @@
  */
 package cc.mashroom.router.impl;
 
-import  java.util.ArrayList;
 import  java.util.Collection;
 import  java.util.List;
 
@@ -30,8 +29,6 @@ public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequest
 	private  OkHttpClient  okHttpClient;
 	
 	private  Collection    <String>urls;
-	
-	private  List  <Service>   backupServices  =  new  ArrayList<Service>();
 	
 	public   List  <Service>   request()
 	{
@@ -49,6 +46,6 @@ public  class  DefaultServiceListRequestStrategy  implements  ServiceListRequest
 			}
 		}
 		
-		System.err.println( "MASHROOM-ROUTER:  ** DEFAULT  SERVICE  LIST  REQUEST  STRATEGY **  no  service  is  available,  use  backup  service  list  instead." );  return  backupServices;
+		System.err.println( "MASHROOM-ROUTER:  ** DEFAULT  SERVICE  LIST  REQUEST  STRATEGY **  no  service  is  available,  use  backup  service  list  instead." );  return  null;
 	}
 }

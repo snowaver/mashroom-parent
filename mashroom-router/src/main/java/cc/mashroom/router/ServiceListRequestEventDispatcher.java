@@ -19,15 +19,15 @@ import  java.util.List;
 
 import  cc.mashroom.util.event.EventDispather;
 
-public  class  ServiceListRequestEventDispatcher  extends  EventDispather<ServiceListRequestEventListener>
+public  class  ServiceListRequestEventDispatcher  extends  EventDispather  <ServiceListRequestEventListener>
 {
 	public  void  onBeforeRequest()
 	{
 		for( ServiceListRequestEventListener  listener : this.listeners )  listener.onBeforeRequest();
 	}
 	
-	public  void  onRequestComplete( List<Service>  services )
+	public  void  onRequestComplete( int  code, List<Service>  services )
 	{
-		for( ServiceListRequestEventListener  listener : this.listeners )  listener.onRequestComplete( services );
+		for( ServiceListRequestEventListener  listener : this.listeners )  listener.onRequestComplete( code,services );
 	}
 }
